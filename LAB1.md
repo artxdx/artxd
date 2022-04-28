@@ -3,9 +3,5 @@
 # Представлена следующая топология
 ![](topology.png)
 # Таблица
-
-
-    | 1             | 2             |
-    | ------------- | ------------- |
-    | Content Cell  | Content Cell  |
-    | Content Cell  | Content Cell  |
+![](table.png)
+   
