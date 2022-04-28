@@ -53,3 +53,12 @@ Router# configure terminal
 b. Настройте имена узлов, как показано в топологии
 R1(config)# hostname R1
 c. Настройте IP-адреса интерфейса, как показано в таблице IP-адресации.
+R1(config)# interface g0/0/0
+R1(config-if)# ip address 10.1.1.1 255.255.255.0
+R1(config-if)# no shutdown
+
+R1(config)# interface g0/0/1
+R1(config-if)# ip address 192.168.1.1 255.255.255.0
+R1(config-if)# no shutdown
+
+d. Чтобы маршрутизатор не пытался перевести неправильно введенные команды, как если бы они были именами хостов, отключите поиск DNS. R1 показан здесь в качестве примера.
