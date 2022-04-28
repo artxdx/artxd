@@ -5,7 +5,7 @@
 # Таблица
 Code Blocks (Preformatted text):
 
-    | First Header  | Second Header |
+    | 1  | 2 |
     | ------------- | ------------- |
     | Content Cell  | Content Cell  |
     | Content Cell  | Content Cell  |
