@@ -92,4 +92,39 @@ R3(config)# router ospf 1
 R3(config-router)# passive-interface g0/0/1  
 
 #### Шаг 4: Проверьте соседей OSPF и информацию о маршруте.  
+a. Выполните команду show ip ospf neighbor, чтобы убедиться, что каждый маршрутизатор перечисляет другие маршрутизаторы в сети в качестве соседей.  
+R1# show ip ospf neighbor  
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+10.2.2.2          1   FULL/BDR        00:00:37    10.1.1.2        GigabitEthernet0/0/0  
+b. Выполните команду show ip-route, чтобы убедиться, что все сети отображаются в таблице маршрутизации на всех маршрутизаторах.  
+R1# show ip route  
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR  
+
+Gateway of last resort is not set
+
+         10.0.0.0/8 is variably subnetted, 3 subnets, 2 masks
+C        10.1.1.0/30 is directly connected, GigabitEthernet0/0/0
+L        10.1.1.1/32 is directly connected, GigabitEthernet0/0/0
+O        10.2.2.0/30 [110/2] via 10.1.1.2, 00:01:11, GigabitEthernet0/0/0
+      192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.1.0/24 is directly connected, GigabitEthernet0/0/1
+L        192.168.1.1/32 is directly connected, GigabitEthernet0/0/1
+O     192.168.3.0/24 [110/3] via 10.1.1.2, 00:01:07, GigabitEthernet0/0/0  
+
+
+
+
+
+
+
+
 
