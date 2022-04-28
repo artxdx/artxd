@@ -64,11 +64,14 @@ R1(config-if)# no shutdown
 d. Чтобы маршрутизатор не пытался перевести неправильно введенные команды, как если бы они были именами хостов, отключите поиск DNS. R1 показан здесь в качестве примера.
 R1(config)# no ip domain-lookup
 #### Шаг 3: Настройте маршрутизацию OSPF на маршрутизаторах.
+
 a. Используйте команду ospf маршрутизатора в режиме глобальной конфигурации, чтобы включить OSPF на R1.
 R1(config)# router ospf 1
+
 b. Настройте сетевые инструкции для сетей на R1. Используйте идентификатор области, равный 0.
 R1(config-router)# network 192.168.1.0 0.0.0.255 area 0
 R1(config-router)# network 10.1.1.0 0.0.0.3 area 0
+
 c. Настройте OSPF на R2 и R3.
 R2(config)#router ospf 1
 R2(config-router)#network 10.1.1.0 0.0.0.3 area 0
@@ -77,6 +80,7 @@ R2(config-router)#network 10.2.2.0 0.0.0.3 area 0
 R3(config)#router ospf 1
 R3(config-router)#network 10.2.2.0 0.0.0.3 area 0
 R3(config-router)#network 192.168.3.0 0.0.0.255 area 0
+
 d. Выполните команду passive-interface, чтобы изменить интерфейс G0/0/1 на R1 и R3 на пассивный
 R1(config)# router ospf 1
 R1(config-router)# passive-interface g0/0/1
