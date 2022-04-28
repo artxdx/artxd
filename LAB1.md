@@ -77,7 +77,7 @@ R2(config-router)#network 10.2.2.0 0.0.0.3 area 0
 R3(config)#router ospf 1
 R3(config-router)#network 10.2.2.0 0.0.0.3 area 0
 R3(config-router)#network 192.168.3.0 0.0.0.255 area 0
-d. Выполните команду passive-interface, чтобы изменить интерфейс G0/0/1 на R1 и R3 на пассивный.
+d. Выполните команду passive-interface, чтобы изменить интерфейс G0/0/1 на R1 и R3 на пассивный
 R1(config)# router ospf 1
 R1(config-router)# passive-interface g0/0/1
 R3(config)# router ospf 1
