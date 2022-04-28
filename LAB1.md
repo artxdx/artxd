@@ -3,9 +3,9 @@
 # Представлена следующая топология
 ![](topology.png)
 # Таблица
-Code Blocks (Preformatted text):
 
-    | 1  | 2 |
+
+    | 1             | 2             |
     | ------------- | ------------- |
     | Content Cell  | Content Cell  |
     | Content Cell  | Content Cell  |
