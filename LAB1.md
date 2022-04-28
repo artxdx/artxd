@@ -109,16 +109,16 @@ Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
        a - application route
        + - replicated route, % - next hop override, p - overrides from PfR  
 
-Gateway of last resort is not set
+Gateway of last resort is not set  
 
-         10.0.0.0/8 is variably subnetted, 3 subnets, 2 masks
-C        10.1.1.0/30 is directly connected, GigabitEthernet0/0/0
-L        10.1.1.1/32 is directly connected, GigabitEthernet0/0/0
-O        10.2.2.0/30 [110/2] via 10.1.1.2, 00:01:11, GigabitEthernet0/0/0
-      192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks
-C        192.168.1.0/24 is directly connected, GigabitEthernet0/0/1
-L        192.168.1.1/32 is directly connected, GigabitEthernet0/0/1
-O     192.168.3.0/24 [110/3] via 10.1.1.2, 00:01:07, GigabitEthernet0/0/0  
+         10.0.0.0/8 is variably subnetted, 3 subnets, 2 masks  
+C        10.1.1.0/30 is directly connected, GigabitEthernet0/0/0  
+L        10.1.1.1/32 is directly connected, GigabitEthernet0/0/0  
+O        10.2.2.0/30 [110/2] via 10.1.1.2, 00:01:11, GigabitEthernet0/0/0  
+      192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks  
+C        192.168.1.0/24 is directly connected, GigabitEthernet0/0/1  
+L        192.168.1.1/32 is directly connected, GigabitEthernet0/0/1  
+O     192.168.3.0/24 [110/3] via 10.1.1.2, 00:01:07, GigabitEthernet0/0/0    
 
 
 
