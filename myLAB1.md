@@ -164,7 +164,17 @@ R1(config-line)# logging synchronous
 
 ## Вопрос:Когда вы настраивали пароль для строки консоли, какое сообщение отображалось?
 
-b. Настройте новый пароль ciscoconpass для консоли.  
+% Password too short - must be at least 10 characters. Password not configured.
+Login disabled on line 0, until 'password' is set
+
+b. Настройте новый пароль ciscoconpass для консоли. \
+
+R1(config)#line console 0          переход в режим конфигурирования консоли
+R1(config-line)#password ciscoconpass               устанавливаем пароль для консоли
+R1(config-line)#exec-timeout 0 0                   устанавливаем время таймаута 0 минут 0 секунд
+R1(config-line)#logging synchronous                запрещаем вывод любых сообщений  
+R1(config-line)#login                               выполняем проверку входа с заданным паролем
+
 c. Настройте пароль для порта AUX для маршрутизатора R1.
 
 R1(config)# line aux 0
