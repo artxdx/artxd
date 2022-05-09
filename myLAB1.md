@@ -44,20 +44,16 @@
 В этой части настройте топологию сети и настройте основные параметры, такие как IP-адреса интерфейса    
 Настраиваем порты коммутаторов  S1 и S3  
 Switch>enable      -  переходим в привелегированный режим настройки    
-Switch#     
 Switch#configure terminal     -переходим в режим конфигурирования коммутатора    
 Enter configuration commands, one per line.  End with CNTL/Z.  
-Switch(config)#hostname S1    -присваиваем имя S1 коммутатору  
+Switch(config)#hostname S1    -присваиваем имя S1 коммутатору    
+S1(config)#interface FastEthernet0/5    - настройка параметров порта Fa0/5  
+S1(config-if)#switchport mode trunk   - переводим порт Fa0/5 в магистральный режим работы   
+S1(config-if)#no shutdown             - включаем порт  Fa0/6  
 
-S1(config)#interface FastEthernet0/5    - настройка параметров порта Fa0/5
-S1(config-if)#switchport mode trunk   - переводим порт Fa0/5 в магистральный режим работы 
-S1(config-if)#no shutdown             - включаем порт  Fa0/6
-
-S1(config)#interface FastEthernet0/6 - настройка параметров порта Fa0/6  
-S1(config-if)#switchport mode access - порт Fa0/6 устанавливаем как порт доступа
-S1(config-if)#no shutdown             - включаем порт Fa0/6
-
-
+S1(config)#interface FastEthernet0/6 - настройка параметров порта Fa0/6    
+S1(config-if)#switchport mode access - порт Fa0/6 устанавливаем как порт доступа  
+S1(config-if)#no shutdown             - включаем порт Fa0/6  
 ## Шаг 1: Подключите кабель к сети.  
 Подсоедините устройства, как показано на схеме топологии, и при необходимости подключите кабель  
 
@@ -69,7 +65,7 @@ Router# configure terminal
 R1(config)# hostname R1  
 ### c. Настройте IP-адреса интерфейса, как показано в таблице IP-адресации.  
 R1(config)# interface g0/0/0  
-R1(config-if)# ip address 10.1.1.1 255.255.255.0  
+R1(config-if)# ip address 10.1.1.1 255.255.255.252  
 R1(config-if)# no shutdown  
 
 R1(config)# interface g0/0/1  
@@ -112,32 +108,31 @@ R3(config-router)# passive-interface g0/0/1
 R1# show ip ospf neighbor  
 
 Neighbor ID     Pri   State           Dead Time   Address         Interface
-10.2.2.2          1   FULL/BDR        00:00:37    10.1.1.2        GigabitEthernet0/0/0  
+10.2.2.2          1   FULL/DR         00:00:31    10.1.1.2        GigabitEthernet0/0/0 
 ### b. Выполните команду show ip-route, чтобы убедиться, что все сети отображаются в таблице маршрутизации на всех маршрутизаторах.  
 R1# show ip route  
 Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
        D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
        N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
-       E1 - OSPF external type 1, E2 - OSPF external type 2
-       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
-       ia - IS-IS inter area, * - candidate default, U - per-user static route
-       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
-       a - application route
-       + - replicated route, % - next hop override, p - overrides from PfR  
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
 
-Gateway of last resort is not set  
+Gateway of last resort is not set
 
-         10.0.0.0/8 is variably subnetted, 3 subnets, 2 masks  
-C        10.1.1.0/30 is directly connected, GigabitEthernet0/0/0  
-L        10.1.1.1/32 is directly connected, GigabitEthernet0/0/0  
-O        10.2.2.0/30 [110/2] via 10.1.1.2, 00:01:11, GigabitEthernet0/0/0  
-      192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks  
-C        192.168.1.0/24 is directly connected, GigabitEthernet0/0/1  
-L        192.168.1.1/32 is directly connected, GigabitEthernet0/0/1  
-O     192.168.3.0/24 [110/3] via 10.1.1.2, 00:01:07, GigabitEthernet0/0/0   
+     10.0.0.0/8 is variably subnetted, 3 subnets, 2 masks
+C       10.1.1.0/30 is directly connected, GigabitEthernet0/0/0
+L       10.1.1.1/32 is directly connected, GigabitEthernet0/0/0
+O       10.2.2.0/30 [110/2] via 10.1.1.2, 00:02:18, GigabitEthernet0/0/0
+     192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.1.0/24 is directly connected, GigabitEthernet0/0/1
+L       192.168.1.1/32 is directly connected, GigabitEthernet0/0/1
+O    192.168.3.0/24 [110/3] via 10.1.1.2, 00:02:18, GigabitEthernet0/0/0   
 
 ## Шаг 5: Настройте параметры IP-адреса хоста ПК.  
 Настройте статический IP-адрес, маску подсети и шлюз по умолчанию для PCA и PCC, как показано в таблице IP-адресации.
+
 ## Шаг 6: Проверьте подключение между PC-A и PC-C.
 ### a. Пинг от R1 до R3.  
 Если запросы не завершились успешно, устраните неполадки в основных конфигурациях устройства, прежде чем продолжить.  
