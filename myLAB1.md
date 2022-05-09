@@ -48,14 +48,15 @@ Switch#
 Switch#configure terminal     -переходим в режим конфигурирования коммутатора    
 Enter configuration commands, one per line.  End with CNTL/Z.  
 Switch(config)#hostname S1    -присваиваем имя S1 коммутатору  
+
 S1(config)#interface FastEthernet0/5    - настройка параметров порта Fa0/5
-S1(config-if)#  
 S1(config-if)#switchport mode trunk   - переводим порт Fa0/5 в магистральный режим работы 
+S1(config-if)#no shutdown             - включаем порт  Fa0/6
 
 S1(config)#interface FastEthernet0/6 - настройка параметров порта Fa0/6  
-S1(config-if)#switchport mode access - переводим порт Fa0/6 в магистральный режим работы 
+S1(config-if)#switchport mode access - порт Fa0/6 устанавливаем как порт доступа
+S1(config-if)#no shutdown             - включаем порт Fa0/6
 
-S1(config-if)#
 
 ## Шаг 1: Подключите кабель к сети.  
 Подсоедините устройства, как показано на схеме топологии, и при необходимости подключите кабель  
