@@ -68,9 +68,9 @@ Neighbor ID     Pri   State           Dead Time   Address         Interface
 10.2.2.2          1   FULL/BDR        00:00:37    10.1.1.2        GigabitEthernet0/0/0  
 b. Выполните команду show ip route , чтобы убедиться, что все сети отображаются в таблице маршрутизации на всех маршрутизаторах.  
 R1# show ip route  
-Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP 
-       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area  
-       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2  
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP   
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area    
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2    
        E1 - OSPF external type 1, E2 - OSPF external type 2  
        i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2  
        ia - IS-IS inter area, * - candidate default, U - per-user static route  
@@ -91,7 +91,7 @@ O     192.168.3.0/24 [110/3] via 10.1.1.2, 00:01:07, GigabitEthernet0/0/0
 ### Шаг 5: Настройте параметры IP-адреса хоста ПК.  
 Настройте статический IP-адрес, маску подсети и шлюз по умолчанию для PCA и PCC, как показано в таблице IP-адресации.  
 ### Шаг 6: Проверьте подключение между ПК и ПК-C.  
-a. Выполните поиск с R1 на R3.  
+a. Выполните поиск с R1 на R3.   
 Если запросы не завершились успешно, устраните неполадки в основных конфигурациях устройства, прежде чем продолжить.  
 b. Выполните пинг с PC-A в локальной сети R1 на PCC в локальной сети R3.  
 Если запросы не завершились успешно, устраните неполадки в основных конфигурациях устройства, прежде чем продолжить.  
@@ -174,11 +174,11 @@ Exec commands:
   debug        Debugging functions (see also 'undebug')  
   do-exec      Mode-independent "do-exec" prefix support  
   enable       Turn on privileged commands  
-  exit         Exit from the EXEC  
-  show         Show running system   
-Примечание: Может быть доступно больше команд EXEC, чем отображается. Это зависит от вашего устройства и используемого образа IOS.  
-g. Изучите команды отображения, доступные в представлении admin1.  
-R1# show ?  
+  exit         Exit from the EXEC    
+  show         Show running system     
+Примечание: Может быть доступно больше команд EXEC, чем отображается. Это зависит от вашего устройства и используемого образа IOS.    
+g. Изучите команды отображения, доступные в представлении admin1.      
+R1# show ?    
   aaa                       Show AAA values  
   access-expression         List access expression  
   access-lists              List access lists  
@@ -189,8 +189,8 @@ R1# show ?
   appfw                     Application Firewall information  
   archive                   Archive functions  
   arp                       ARP table  
-<output omitted>  
-### Шаг 5: Создайте представление admin 2, установите пароль и назначьте привилегии.  
+<output omitted>    
+### Шаг 5: Создайте представление admin 2, установите пароль и назначьте привилегии.    
 a. Пользователь admin2 является младшим администратором, проходящим обучение, которому разрешено просматривать все конфигурации, но не разрешается настраивать маршрутизаторы или использовать команды отладки.  
 b. Используйте команду включить просмотр, чтобы включить корневой просмотр, и введите секретный пароль включения cisco12345.  
 R1# enable view  
