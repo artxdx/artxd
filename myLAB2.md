@@ -93,17 +93,51 @@ C        192.168.1.0/24 is directly connected, GigabitEthernet0/0/1
 L        192.168.1.1/32 is directly connected, GigabitEthernet0/0/1  
 O     192.168.3.0/24 [110/3] via 10.1.1.2, 00:01:07, GigabitEthernet0/0/0  
 ### Шаг 5: Настройте параметры IP-адреса хоста ПК.  
-Настройте статический IP-адрес, маску подсети и шлюз по умолчанию для PCA и PCC, как показано в таблице IP-адресации.  
+Настройте статический IP-адрес, маску подсети и шлюз по умолчанию для PCA и PCC, как показано в таблице IP-адресации. 
+C:\>ipconfig        
+FastEthernet0 Connection:(default port)       
+
+   Connection-specific DNS Suffix..:     
+   Link-local IPv6 Address.........: FE80::2D0:58FF:FEEE:866    
+   IPv6 Address....................: ::    
+   IPv4 Address....................: 192.168.3.3    
+   Subnet Mask.....................: 255.255.255.0    
+   Default Gateway.................: ::    
+                                     192.168.3.1    
 ### Шаг 6: Проверьте подключение между ПК и ПК-C.  
 a. Выполните поиск с R1 на R3.  
+R1#ping 10.2.2.1
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.2.2.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
+
 Если запросы не завершились успешно, устраните неполадки в основных конфигурациях устройства, прежде чем продолжить.  
-b. Выполните пинг с PC-A в локальной сети R1 на PCC в локальной сети R3.  
+b. Выполните пинг с PC-A в локальной сети R1 на PCC в локальной сети R3.
+C:\>ping 192.168.3.3
+
+Pinging 192.168.3.3 with 32 bytes of data:
+
+Reply from 192.168.3.3: bytes=32 time<1ms TTL=125
+Reply from 192.168.3.3: bytes=32 time=1ms TTL=125
+Reply from 192.168.3.3: bytes=32 time<1ms TTL=125
+Reply from 192.168.3.3: bytes=32 time=1ms TTL=125
+
+Ping statistics for 192.168.3.3:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 1ms, Average = 0ms 
+    
 Если запросы не завершились успешно, устраните неполадки в основных конфигурациях устройства, прежде чем продолжить.  
 Примечание: Если вы можете выполнить пинг с ПК-A на ПК-C, вы продемонстрировали, что маршрутизация OSPF настроена и функционирует правильно.   
 Если вы не можете выполнить пинг, но интерфейсы устройств подключены, а IP-адреса указаны правильно, используйте show run, show ip ospf neighbor, и show ip route  
 команды, помогающие выявить проблемы, связанные с протоколом маршрутизации.  
 ### Шаг 7: Сохраните базовую текущую конфигурацию для каждого маршрутизатора.  
-Сохраните базовую текущую конфигурацию маршрутизаторов в виде текстовых файлов на вашем компьютере.   
+Сохраните базовую текущую конфигурацию маршрутизаторов в виде текстовых файлов на вашем компьютере.
+write memory
+Building configuration...
+[OK]
 Эти текстовые файлы можно использовать для восстановления конфигураций позже в лаборатории.  
 Закрыть окно настройки  
 ## Часть 2. Настройка административных ролей  
@@ -133,67 +167,90 @@ R1# exit
 ### Шаг 3: Включите корневой(root) просмотр.  
 Используйте команду включить просмотр, чтобы включить корневой(root) просмотр.  
 R1# enable view  
-Password: cisco12345  
+Password: cisco12345 
+
+R1#%PARSER-6-VIEW_SWITCH: successfully set to view 'root'.
+
 ### Шаг 4: Создайте представление admin 1, установите пароль и назначьте привилегии.  
 a. Пользователь admin1 - это пользователь верхнего уровня ниже root, которому разрешен доступ к этому маршрутизатору.   
 Он обладает наибольшим авторитетом. Пользователь admin1 может использовать все команды show, config и debug.  
 Используйте следующую команду, чтобы создать представление admin 1 в корневом представлении.  
 R1# configure terminal  
 R1(config)# parser view admin1  
+R1(config-view)#%PARSER-6-VIEW_CREATED: view 'admin1' successfully created.
+
 R1(config-view)#  
 Примечание: Чтобы удалить представление, используйте команду no parser view viewname.  
 b. Свяжите представление admin1 с зашифрованным паролем.  
 R1(config-view)# secret admin1pass  
 R1(config-view)#  
-c. Просмотрите команды, которые можно настроить в представлении admin 1. Использовать команды? команда для просмотра доступных команд.  
+c. Просмотрите команды, которые можно настроить в представлении admin1. Использовать команды? команда для просмотра доступных команд. 
 Ниже приведен частичный список доступных команд.  
-R1(config-view)# commands ?  
-  RITE-profile           Router IP traffic export profile command mode  
-  RMI Node Config        Resource Policy Node Config mode  
-  RMI Resource Group     Resource Group Config mode  
-  RMI Resource Manager   Resource Manager Config mode  
-  RMI Resource Policy    Resource Policy Config mode  
-  SASL-profile           SASL profile configuration mode  
-  aaa-attr-list          AAA attribute list config mode  
-  aaa-user               AAA user definition  
-  accept-dialin          VPDN group accept dialin configuration mode  
-  accept-dialout         VPDN group accept dialout configuration mode  
-  address-family         Address Family configuration mode  
-<output omitted>  
+R1(config-view)#commands ?
+  configure  Global configuration mode
+  exec       Exec mode
+  interface  Interface configuration mode
+  line       Line configuration mode
+  router     Router configuration mode
+  
+Просмвтриваем список команд которые доступны в представлении admin1(после его создания)
+R1#?
+Exec commands:
+  disable     Turn off privileged commands
+  enable      Turn on privileged commands
+  exit        Exit from the EXEC
+  logout      Exit from the EXEC
+  
+
 d. Добавьте все команды config, show и debug в представление admin 1, а затем выйдите из режима просмотра конфигурации.  
-  R1(config-view)# commands exec include all show  
+R1(config-view)# commands exec include all show  
 R1(config-view)# commands exec include all config terminal  
 R1(config-view)# commands exec include all debug  
 R1(config-view)# end  
 e. Проверьте представление admin1.  
   R1# enable view admin1  
-  Password: admin1pass  
+  Password: admin1pass
+  
+  R1#%PARSER-6-VIEW_SWITCH: successfully set to view 'admin1'.
+  
   R1# show parser view  
-Current view is ‘admin1’  
+Current view is 'admin1'  
 f. Изучите команды, доступные в представлении admin1.  
-  R1# ?  
-Exec commands:  
-  <0-0>/<0-4>  Enter card slot/sublot number  
-  configure    Enter configuration mode  
-  debug        Debugging functions (see also 'undebug')  
-  do-exec      Mode-independent "do-exec" prefix support  
-  enable       Turn on privileged commands  
-  exit         Exit from the EXEC  
-  show         Show running system   
+R1#?
+Exec commands:
+  configure   Enter configuration mode
+  debug       Debugging functions (see also 'undebug')
+  disable     Turn off privileged commands
+  enable      Turn on privileged commands
+  exit        Exit from the EXEC
+  logout      Exit from the EXEC
+  show        Show running system information
 Примечание: Может быть доступно больше команд EXEC, чем отображается. Это зависит от вашего устройства и используемого образа IOS.  
 g. Изучите команды отображения, доступные в представлении admin1.  
-R1# show ?  
-  aaa                       Show AAA values  
-  access-expression         List access expression  
-  access-lists              List access lists  
-  acircuit                  Access circuit info  
-  adjacency                 Adjacent nodes  
-  aliases                   Display alias commands  
-  alignment                 Show alignment information  
-  appfw                     Application Firewall information  
-  archive                   Archive functions  
-  arp                       ARP table  
-<output omitted>  
+R1#show ?
+  aaa                Show AAA values
+  access-lists       List access lists
+  arp                Arp table
+  cdp                CDP information
+  class-map          Show QoS Class Map
+  clock              Display the system clock
+  controllers        Interface controllers status
+  crypto             Encryption module
+  debugging          State of each debugging option
+  dhcp               Dynamic Host Configuration Protocol status
+  dot11              IEEE 802.11 show information
+  file               Show filesystem information
+  flash:             display information about flash: file system
+  flow               Flow information
+  frame-relay        Frame-Relay information
+  history            Display the session command history
+  hosts              IP domain-name, lookup style, nameservers, and host table
+  interfaces         Interface status and configuration
+  ip                 IP information
+  ipv6               IPv6 information
+  license            Show license information
+  line               TTY line information
+ --More-- 
 ### Шаг 5: Создайте представление admin 2, установите пароль и назначьте привилегии.  
 a. Пользователь admin2 является младшим администратором, проходящим обучение, которому разрешено просматривать все конфигурации, но не разрешается настраивать маршрутизаторы или использовать команды отладки.  
 b. Используйте команду включить просмотр, чтобы включить корневой просмотр, и введите секретный пароль включения cisco12345.  
@@ -213,23 +270,29 @@ Password: cisco12345
   R1# show parser view  
   Current view is ‘admin2’  
   g. Изучите команды, доступные в представлении admin2.  
-  R1# ?  
-Exec commands:  
-  <0-0>/<0-4>  Enter card slot/sublot number  
-  do-exec      Mode-independent "do-exec" prefix support  
-  enable       Turn on privileged commands  
-  exit         Exit from the EXEC  
-  show         Show running system information  
+  R1#?
+Exec commands:
+  disable     Turn off privileged commands
+  enable      Turn on privileged commands
+  exit        Exit from the EXEC
+  logout      Exit from the EXEC
+  show        Show running system information
 Примечание: Может быть доступно больше команд EXEC, чем отображается. Это зависит от вашего устройства и используемого образа IOS.  
 ## Вопрос:    
-##Чего не хватает в списке команд admin 2, который присутствует в командах admin 1?  
+##Чего не хватает в списке команд admin 2, который присутствует в командах admin 1? 
+
+Команд конфигурирования и отладки.
+
 ### Шаг 6: Создайте техническое представление, установите пароль и назначьте привилегии.  
-a. Технический пользователь обычно устанавливает устройства конечного пользователя и кабели. Техническим пользователям разрешено использовать только выбранные команды    показа.  
+a. Технический пользователь обычно устанавливает устройства конечного пользователя и кабели. Техническим пользователям разрешено использовать только выбранные команды   показа.
 b. Используйте команду включить просмотр, чтобы включить корневой просмотр, и введите секретный пароль включения cisco12345.  
 R1# enable view  
 Password: cisco12345  
 c. Используйте следующую команду для создания технического представления.  
-R1(config)# parser view tech  
+R1(config)# parser view tech 
+
+R1(config-view)#%PARSER-6-VIEW_CREATED: view 'tech' successfully created.
+
 d. Свяжите техническое представление с паролем.  
 R1(config-view)# secret techpasswd  
 e. Добавьте следующие команды отображения в представление, а затем выйдите из режима настройки представления.  
@@ -240,46 +303,93 @@ R1(config-view)# commands exec include show parser view
 R1(config-view)# end  
 f. Проверьте техническое представление.  
 R1# enable view tech  
-Password: techpasswd  
+Password: techpasswd
+
+R1#%PARSER-6-VIEW_SWITCH: successfully set to view 'tech'.
+
 R1# show parser view  
 Current view is ‘tech’  
 g. Изучите команды, доступные в техническом представлении.  
-R1# ?  
-Exec commands:  
-  <0-0>/<0-4>  Enter card slot/sublot number  
-  do-exec      Mode-independent "do-exec" prefix support  
-  enable       Turn on privileged commands  
-  exit         Exit from the EXEC  
-  show         Show running system information  
+R1#?
+Exec commands:
+  disable     Turn off privileged commands
+  enable      Turn on privileged commands
+  exit        Exit from the EXEC
+  logout      Exit from the EXEC
+  show        Show running system information
 Примечание: Может быть доступно больше команд EXEC, чем отображается. Это зависит от вашего устройства и используемого образа IOS.  
 * h. Изучите команды отображения, доступные в техническом представлении.  *
-R1# show ?  
-  banner      Display banner information  
-  flash0:     display information about flash0: file system  
-  flash1:     display information about flash1: file system  
-  flash:      display information about flash: file system  
-  interfaces  Interface status and configuration   
-  ip          IP information  
-  parser      Display parser information  
-  usbflash0:  display information about usbflash0: file system  
-  version     System hardware and software status  
+R1#show ?
+  interfaces         Interface status and configuration
+  ip                 IP information
+  parser             Show parser commands
+  version            System hardware and software status
 Примечание: Может быть доступно больше команд EXEC, чем отображается. Это зависит от вашего устройства и используемого образа IOS.  
-*i. Выполните краткую команду показать ip-интерфейс.*     
+*i. Выполните краткую команду показать ip-интерфейс.*
+R1#show ip interface
+GigabitEthernet0/0/0 is up, line protocol is up (connected)
+  Internet address is 192.168.1.1/24
+  Broadcast address is 255.255.255.255
+  Address determined by setup command
+  MTU is 1500 bytes
+  Helper address is not set
+  Directed broadcast forwarding is disabled
+  Outgoing access list is not set
+  Inbound  access list is not set
+  Proxy ARP is enabled
+  Security level is default
+  Split horizon is enabled
+  ICMP redirects are always sent
+  ICMP unreachables are always sent
+  ICMP mask replies are never sent
+  IP fast switching is disabled
+  IP fast switching on the same interface is disabled
+  IP Flow switching is disabled
+  IP Fast switching turbo vector
+  IP multicast fast switching is disabled
+  IP multicast distributed fast switching is disabled
+  Router Discovery is disabled
+ --More--
+ 
 ## Вопрос:    
 ## Смогли ли вы сделать это как технический пользователь? Объяснять.    
-## Введите свои ответы здесь.    
-*j. Выполните команду показать ip-маршрут.*  
+## Введите свои ответы здесь.  
+Да.Данная команда доступна для технического пользователя.(Представление Tech) 
+
+*j. Выполните команду показать ip-маршрут.*
+
+R1#show ip route
+           ^
+% Invalid input detected at '^' marker.
 ## Вопрос:  
 ## Смогли ли вы сделать это как технический пользователь?  
-## Введите свои ответы здесь.  
+## Введите свои ответы здесь.
+Данная команда не доступная техническому пользователю.(Представление Tech)
+
 *k. Вернитесь к корневому просмотру с помощью команды включить просмотр. * 
 R1# включить просмотр     
 Пароль: cisco12345    
 *l. Выполните команду show run, чтобы просмотреть созданные вами представления.*  
-         
+
+parser view tech
+ secret 5 $1$mERr$QMUdu4f7Qgk/Gy0quE8Eh0
+ commands exec include show
+ commands exec include show interfaces
+ commands exec include show ip
+ commands exec include show ip interface
+ commands exec include show ip interface brief
+ commands exec include show parser
+ commands exec include show parser view
+ commands exec include show version         
+
 ## Вопрос:         
 ## Для технического просмотра, почему перечислены команды show и show ip, а также show ip interface и show ip interface brief?    
-## Введите свои ответы здесь.      
+## Введите свои ответы здесь.
+Для доступа к командам
+show ?
+show ip ?
+show ip interface ?
+show ip interface brief
 *m. Настройте те же административные роли на маршрутизаторе R3.*   
          
 ### Шаг 7: Сохраните конфигурацию на маршрутизаторах R1 и R3.  
