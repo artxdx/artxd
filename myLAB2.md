@@ -25,7 +25,7 @@
 * 2 ПК (ОС Windows с установленной программой эмуляции терминала, такой как PuTTY или Tera Term)  
 * Консольные кабели для настройки сетевых устройств Cisco  
 * Кабели Ethernet , как показано в топологии  
-# Выполнение лабораторной работы № 3  
+# Выполнение лабораторной работы № 2  
 ## Часть 1. Настройка Основных Параметров Устройства  
 В этой части настройте топологию сети и настройте основные параметры, такие как IP-адреса интерфейса.  
 ### Шаг 1: Подключите кабель к сети.  
@@ -45,7 +45,7 @@ R1(config-if)# no shutdown
 R1(config)# interface g0/0/1  
 R1(config-if)# ip address 192.168.1.1 255.255.255.0  
 R1(config-if)# no shutdown  
-б. Чтобы маршрутизатор не пытался перевести неправильно введенные команды, как если бы они были именами хостов, отключите поиск DNS. R1 показан здесь в качестве примера.
+б. Чтобы маршрутизатор не пытался перевести неправильно введенные команды, как если бы они были именами хостов, отключите поиск DNS. R1 показан здесь в качестве примера.    
 R1(config)# no ip domain-lookup  
 ### Шаг 3: Настройте маршрутизацию OSPF на маршрутизаторах.  
 a. Используйте команду ospf маршрутизатора в режиме глобальной конфигурации, чтобы включить OSPF на R1.  
@@ -67,33 +67,60 @@ R3(config)# router ospf 1
 R3(config-router)# passive-interface g0/0/1  
 ### Шаг 4: Проверьте соседей OSPF и информацию о маршруте.  
 a. Выполните команду show ip ospf neighbor, чтобы убедиться, что каждый маршрутизатор перечисляет другие маршрутизаторы в сети в качестве соседей.  
-R1# show ip ospf neighbor  
-Neighbor ID     Pri   State           Dead Time   Address         Interface  
-10.2.2.2          1   FULL/BDR        00:00:37    10.1.1.2        GigabitEthernet0/0/0  
+R1#show ip ospf neighbor
+
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+10.2.2.2          1   FULL/BDR        00:00:30    10.1.1.2        GigabitEthernet0/0/1  
+
+R2#show ip ospf neighbor
+
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+192.168.1.1       1   FULL/DR         00:00:38    10.1.1.1        GigabitEthernet0/0/0
+192.168.3.1       1   FULL/DR         00:00:38    10.2.2.1        GigabitEthernet0/0/1  
+
+R3#show ip ospf neighbor
+
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+10.2.2.2          1   FULL/BDR        00:00:36    10.2.2.2        GigabitEthernet0/0/0
+
 b. Выполните команду show ip route , чтобы убедиться, что все сети отображаются в таблице маршрутизации на всех маршрутизаторах.  
-R1# show ip route  
-Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP 
-       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area  
-       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2  
-       E1 - OSPF external type 1, E2 - OSPF external type 2  
-       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2  
-       ia - IS-IS inter area, * - candidate default, U - per-user static route  
-       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP  
-       a - application route  
-       + - replicated route, % - next hop override, p - overrides from PfR  
+R1#show ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
 
-Gateway of last resort is not set  
+Gateway of last resort is not set
 
-      10.0.0.0/8 is variably subnetted, 3 subnets, 2 masks  
-C        10.1.1.0/30 is directly connected, GigabitEthernet0/0/0  
-L        10.1.1.1/32 is directly connected, GigabitEthernet0/0/0  
-O        10.2.2.0/30 [110/2] via 10.1.1.2, 00:01:11, GigabitEthernet0/0/0  
-      192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks  
-C        192.168.1.0/24 is directly connected, GigabitEthernet0/0/1  
-L        192.168.1.1/32 is directly connected, GigabitEthernet0/0/1  
-O     192.168.3.0/24 [110/3] via 10.1.1.2, 00:01:07, GigabitEthernet0/0/0  
+     10.0.0.0/8 is variably subnetted, 3 subnets, 2 masks
+C       10.1.1.0/30 is directly connected, GigabitEthernet0/0/1
+L       10.1.1.1/32 is directly connected, GigabitEthernet0/0/1
+O       10.2.2.0/30 [110/2] via 10.1.1.2, 00:37:17, GigabitEthernet0/0/1
+     192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.1.0/24 is directly connected, GigabitEthernet0/0/0
+L       192.168.1.1/32 is directly connected, GigabitEthernet0/0/0
+O    192.168.3.0/24 [110/3] via 10.1.1.2, 00:37:17, GigabitEthernet0/0/1  
 ### Шаг 5: Настройте параметры IP-адреса хоста ПК.  
 Настройте статический IP-адрес, маску подсети и шлюз по умолчанию для PCA и PCC, как показано в таблице IP-адресации. 
+PC-A   
+C:\>ipconfig
+
+FastEthernet0 Connection:(default port)
+
+   Connection-specific DNS Suffix..: 
+   Link-local IPv6 Address.........: FE80::200:CFF:FE46:EE2E
+   IPv6 Address....................: ::
+   IPv4 Address....................: 192.168.1.3
+   Subnet Mask.....................: 255.255.255.0
+   Default Gateway.................: ::
+                                     192.168.1.1  
+PC-C   
 C:\>ipconfig        
 FastEthernet0 Connection:(default port)       
 
@@ -104,7 +131,20 @@ FastEthernet0 Connection:(default port)
    Subnet Mask.....................: 255.255.255.0    
    Default Gateway.................: ::    
                                      192.168.3.1    
-### Шаг 6: Проверьте подключение между ПК и ПК-C.  
+### Шаг 6: Проверьте подключение между ПC-A и PC-C.
+C:\>ping 192.168.3.3
+
+Pinging 192.168.3.3 with 32 bytes of data:
+
+Reply from 192.168.3.3: bytes=32 time<1ms TTL=125
+Reply from 192.168.3.3: bytes=32 time<1ms TTL=125
+Reply from 192.168.3.3: bytes=32 time<1ms TTL=125
+Reply from 192.168.3.3: bytes=32 time<1ms TTL=125
+
+Ping statistics for 192.168.3.3:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms  
 a. Выполните поиск с R1 на R3.  
 R1#ping 10.2.2.1
 
@@ -115,31 +155,49 @@ Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms
 
 Если запросы не завершились успешно, устраните неполадки в основных конфигурациях устройства, прежде чем продолжить.  
 b. Выполните пинг с PC-A в локальной сети R1 на PCC в локальной сети R3.
-C:\>ping 192.168.3.3
+PC-A
+C:\>ping 192.168.1.1
 
-Pinging 192.168.3.3 with 32 bytes of data:
+Pinging 192.168.1.1 with 32 bytes of data:
 
-Reply from 192.168.3.3: bytes=32 time<1ms TTL=125
-Reply from 192.168.3.3: bytes=32 time=1ms TTL=125
-Reply from 192.168.3.3: bytes=32 time<1ms TTL=125
-Reply from 192.168.3.3: bytes=32 time=1ms TTL=125
+Reply from 192.168.1.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.1.1: bytes=32 time=21ms TTL=255
+Reply from 192.168.1.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.1.1: bytes=32 time<1ms TTL=255
 
-Ping statistics for 192.168.3.3:
+Ping statistics for 192.168.1.1:
     Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
 Approximate round trip times in milli-seconds:
-    Minimum = 0ms, Maximum = 1ms, Average = 0ms 
-    
+    Minimum = 0ms, Maximum = 21ms, Average = 5ms   
+PC-C  
+C:\>ping 192.168.3.1
+
+Pinging 192.168.3.1 with 32 bytes of data:
+
+Reply from 192.168.3.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.3.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.3.1: bytes=32 time<1ms TTL=255
+Reply from 192.168.3.1: bytes=32 time<1ms TTL=255
+
+Ping statistics for 192.168.3.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0m 
+        
 Если запросы не завершились успешно, устраните неполадки в основных конфигурациях устройства, прежде чем продолжить.  
 Примечание: Если вы можете выполнить пинг с ПК-A на ПК-C, вы продемонстрировали, что маршрутизация OSPF настроена и функционирует правильно.   
 Если вы не можете выполнить пинг, но интерфейсы устройств подключены, а IP-адреса указаны правильно, используйте show run, show ip ospf neighbor, и show ip route  
-команды, помогающие выявить проблемы, связанные с протоколом маршрутизации.  
+команды, помогающие выявить проблемы, связанные с протоколом маршрутизации. 
+
 ### Шаг 7: Сохраните базовую текущую конфигурацию для каждого маршрутизатора.  
 Сохраните базовую текущую конфигурацию маршрутизаторов в виде текстовых файлов на вашем компьютере.
 write memory
 Building configuration...
 [OK]
+
 Эти текстовые файлы можно использовать для восстановления конфигураций позже в лаборатории.  
 Закрыть окно настройки  
+
 ## Часть 2. Настройка административных ролей  
 В этой части лаборатории вы будете:  
 * Создайте несколько административных ролей или представлений на маршрутизаторах R1 и R3.  
