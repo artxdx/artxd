@@ -438,24 +438,24 @@ parser view tech
  commands exec include show ip interface brief
  commands exec include show parser
  commands exec include show parser view
- commands exec include show version         
+ commands exec include show version           
 
 ## Вопрос:         
-## Для технического просмотра, почему перечислены команды show и show ip, а также show ip interface и show ip interface brief?    
-## Введите свои ответы здесь.
-Для доступа к командам
-show ?
-show ip ?
-show ip interface ?
-show ip interface brief
-*m. Настройте те же административные роли на маршрутизаторе R3.*   
+## Для технического просмотра, почему перечислены команды show и show ip, а также show ip interface и show ip interface brief?      
+## Введите свои ответы здесь.  
+Для доступа к командам  
+show ?  
+show ip ?  
+show ip interface ?  
+show ip interface brief  
+*m. Настройте те же административные роли на маршрутизаторе R3.*     
          
 ### Шаг 7: Сохраните конфигурацию на маршрутизаторах R1 и R3.    
-Сохраните текущую конфигурацию в конфигурации запуска из привилегированной командной строки EXEC. 
-R1#copy running-config startup-config
-Destination filename [startup-config]? 
-Building configuration...
-[OK]
+Сохраните текущую конфигурацию в конфигурации запуска из привилегированной командной строки EXEC.   
+R1#copy running-config startup-config  
+Destination filename [startup-config]?   
+Building configuration...  
+[OK]  
   
 
 
