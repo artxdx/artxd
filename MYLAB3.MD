@@ -120,7 +120,7 @@ FastEthernet0 Connection:(default port)
    Default Gateway.................: ::    
                                      192.168.1.1      
 PC-C     
-C:\>ipconfig          
+C:\ipconfig          
 FastEthernet0 Connection:(default port)           
 
    Connection-specific DNS Suffix..:         
@@ -131,7 +131,7 @@ FastEthernet0 Connection:(default port)
    Default Gateway.................: ::        
                                      192.168.3.1        
 ### Шаг 6: Проверьте подключение между ПC-A и PC-C.    
-C:\>ping 192.168.3.3    
+C:\ping 192.168.3.3    
 
 Pinging 192.168.3.3 with 32 bytes of data:   
 
@@ -169,7 +169,7 @@ Ping statistics for 192.168.1.1:
 Approximate round trip times in milli-seconds:    
     Minimum = 0ms, Maximum = 21ms, Average = 5ms        
 PC-C    
-C:\>ping 192.168.3.1    
+C:\ping 192.168.3.1    
 
 Pinging 192.168.3.1 with 32 bytes of data:   
 
@@ -197,6 +197,42 @@ Approximate round trip times in milli-seconds:
 
 ## Часть 2. Настройка основных параметров безопасности на R1
 В этой части скопируйте и вставьте следующие команды в R1 для настройки основных параметров безопасности.  
+enable
+configure terminal
+service password-encryption
+security passwords min-length 10
+enable algorithm-type scrypt secret cisco12345
+ip domain name netsec.com
+username user01 algorithm-type scrypt secret user01pass
+username admin privilege 15 algorithm-type scrypt secret adminpasswd
+banner motd " Unauthorized access is strictly prohibited! "
+line con 0
+ exec-timeout 5 0
+login local
+ logging synchronous
+line aux 0
+ exec-timeout 5 0
+login local
+line vty 0 4
+ exec-timeout 5 0
+ privilege level 15
+transport input ssh
+ login local
+crypto key generate rsa general-keys modulus 1024
+ip ssh time-out 90
+ip ssh authentication-retries 2
+ip ssh version 2
+
+## Часть 3. Настройка Автоматических функций Безопасности
+В этой части вы сделаете следующее:
+* Используйте автозащиту для защиты R3.
+* Просмотрите конфигурации безопасности маршрутизатора с помощью CLI.
+С помощью одной команды в режиме CLI функция автозащиты позволяет отключить обычные IP-службы, которые могут быть использованы для сетевых атак. Он также может включать IP-сервисы и функции, которые могут помочь в защите сети при атаке. Автозащита упрощает настройку безопасности маршрутизатора и упрощает настройку маршрутизатора.
+
+Шаг 1: Используйте функцию автоматической защиты Cisco IOS на R3.
+a. Войдите в привилегированный режим EXEC с помощью команды enable.
+b. Выполните команду auto secure на R3, чтобы заблокировать маршрутизатор. R2 представляет собой маршрутизатор интернет-провайдера, поэтому предположим, что R3 G0/0/0 подключен к Интернету при запросе вопросов автозащиты. Ответьте на вопросы автозащиты, как показано в следующих выходных данных. Ответы выделены жирным шрифтом.
+R3# auto secure
 
 ### Шаг 1: Включите AAA на маршрутизаторе R1.    
 Открыть окно конфигурации     
