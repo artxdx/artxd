@@ -229,252 +229,204 @@ ip ssh version 2
 * Просмотрите конфигурации безопасности маршрутизатора с помощью CLI.
 С помощью одной команды в режиме CLI функция автозащиты позволяет отключить обычные IP-службы, которые могут быть использованы для сетевых атак. Он также может включать IP-сервисы и функции, которые могут помочь в защите сети при атаке. Автозащита упрощает настройку безопасности маршрутизатора и упрощает настройку маршрутизатора.
 
-Шаг 1: Используйте функцию автоматической защиты Cisco IOS на R3.
+### Шаг 1: Используйте функцию автоматической защиты Cisco IOS на R3.
 a. Войдите в привилегированный режим EXEC с помощью команды enable.
 b. Выполните команду auto secure на R3, чтобы заблокировать маршрутизатор. R2 представляет собой маршрутизатор интернет-провайдера, поэтому предположим, что R3 G0/0/0 подключен к Интернету при запросе вопросов автозащиты. Ответьте на вопросы автозащиты, как показано в следующих выходных данных. Ответы выделены жирным шрифтом.
+
 R3# auto secure
+                --- AutoSecure Configuration ---
 
-### Шаг 1: Включите AAA на маршрутизаторе R1.    
-Открыть окно конфигурации     
-Чтобы определить представления, включите AAA на маршрутизаторе.      
-R1# configure terminal     
-R1(config)# aaa new-model      
-### Шаг 2: Настройте пароль привилегированного режима EXEC.      
-Для доступа к корневому представлению требуется пароль привилегированного режима EXEC. В этом примере используется пароль cisco12345.      
-R1(config)# enable secret cisco12345       
-R1# exit      
-### Шаг 3: Включите корневой(root) просмотр.      
-Используйте команду включить просмотр, чтобы включить корневой(root) просмотр.    
-R1# enable view      
-Password: cisco12345     
+*** AutoSecure configuration enhances the security of
+the router but it will not make router absolutely secure
+from all security attacks ***
 
-R1#%PARSER-6-VIEW_SWITCH: successfully set to view 'root'.    
+All the configuration done as part of AutoSecure will be
+shown here. For more details of why and how this configuration
+is useful, and any possible side effects, please refer to Cisco
+documentation of AutoSecure.
+At any prompt you may enter '?' for help.
+Use ctrl-c to abort this session at any prompt.
 
-### Шаг 4: Создайте представление admin 1, установите пароль и назначьте привилегии.      
-a. Пользователь admin1 - это пользователь верхнего уровня ниже root, которому разрешен доступ к этому маршрутизатору.       
-Он обладает наибольшим авторитетом. Пользователь admin1 может использовать все команды show, config и debug.      
-Используйте следующую команду, чтобы создать представление admin 1 в корневом представлении.      
-R1# configure terminal      
-R1(config)# parser view admin1      
-R1(config-view)#%PARSER-6-VIEW_CREATED: view 'admin1' successfully created.    
+If this device is being managed by a network management station,
+AutoSecure configuration may block network management traffic.
+Continue with AutoSecure? [no]: yes
 
-R1(config-view)#      
-Примечание: Чтобы удалить представление, используйте команду no parser view viewname.      
-b. Свяжите представление admin1 с зашифрованным паролем.     
-R1(config-view)# secret admin1pass      
-R1(config-view)#      
-c. Просмотрите команды, которые можно настроить в представлении admin1. Использовать команды? команда для просмотра доступных команд.   
-Ниже приведен частичный список доступных команд.     
-R1(config-view)#commands ?    
-  configure  Global configuration mode    
-  exec       Exec mode    
-  interface  Interface configuration mode    
-  line       Line configuration mode    
-  router     Router configuration mode    
-  
-Просмвтриваем список команд которые доступны в представлении admin1(после его создания)    
-R1#?    
-Exec commands:    
-  disable     Turn off privileged commands    
-  enable      Turn on privileged commands    
-  exit        Exit from the EXEC    
-  logout      Exit from the EXEC    
-  
+Gathering information about the router for AutoSecure
 
-d. Добавьте все команды config, show и debug в представление admin 1, а затем выйдите из режима просмотра конфигурации.      
-R1(config-view)# commands exec include all show      
-R1(config-view)# commands exec include all config terminal      
-R1(config-view)# commands exec include all debug      
-R1(config-view)# end      
-e. Проверьте представление admin1.      
-  R1# enable view admin1      
-  Password: admin1pass    
-  
-  R1#%PARSER-6-VIEW_SWITCH: successfully set to view 'admin1'.    
-  
-  R1# show parser view      
-Current view is 'admin1'      
-f. Изучите команды, доступные в представлении admin1.      
-R1#?    
-Exec commands:    
-  configure   Enter configuration mode    
-  debug       Debugging functions (see also 'undebug')    
-  disable     Turn off privileged commands    
-  enable      Turn on privileged commands    
-  exit        Exit from the EXEC    
-  logout      Exit from the EXEC    
-  show        Show running system information    
-Примечание: Может быть доступно больше команд EXEC, чем отображается. Это зависит от вашего устройства и используемого образа IOS.   
-g. Изучите команды отображения, доступные в представлении admin1.    
-R1#show ?    
-  aaa                Show AAA values    
-  access-lists       List access lists    
-  arp                Arp table    
-  cdp                CDP information    
-  class-map          Show QoS Class Map    
-  clock              Display the system clock    
-  controllers        Interface controllers status    
-  crypto             Encryption module    
-  debugging          State of each debugging option    
-  dhcp               Dynamic Host Configuration Protocol status    
-  dot11              IEEE 802.11 show information    
-  file               Show filesystem information    
-  flash:             display information about flash: file system    
-  flow               Flow information    
-  frame-relay        Frame-Relay information    
-  history            Display the session command history    
-  hosts              IP domain-name, lookup style, nameservers, and host table    
-  interfaces         Interface status and configuration    
-  ip                 IP information    
-  ipv6               IPv6 information   
-  license            Show license information   
-  line               TTY line information   
- --More--     
-### Шаг 5: Создайте представление admin 2, установите пароль и назначьте привилегии.      
-a. Пользователь admin2 является младшим администратором, проходящим обучение, которому разрешено просматривать все конфигурации, но     не разрешается настраивать маршрутизаторы или использовать команды отладки.      
-b. Используйте команду включить просмотр, чтобы включить корневой просмотр, и введите секретный пароль включения cisco12345.      
-R1# enable view    
-Password: cisco12345     
-  c. Используйте следующую команду для создания представления admin 2.     
-  R1# configure terminal    
-  R1(config)# parser view admin2     
-  d. Свяжите представление admin2 с паролем.      
-  R1(config-view)# secret admin2pass      
-  e. Добавьте все команды отображения в представление, а затем выйдите из режима настройки представления.      
-  R1(config-view)# commands exec include all show      
-  R1(config-view)# end      
-  f. Проверьте представление admin2.      
-  R1# enable view admin2    
-  Password: admin2pass    
-  R1# show parser view    
-  Current view is ‘admin2’   
-  g. Изучите команды, доступные в представлении admin2.    
-  R1#?  
-Exec commands:  
-  disable     Turn off privileged commands  
-  enable      Turn on privileged commands  
-  exit        Exit from the EXEC  
-  logout      Exit from the EXEC  
-  show        Show running system information   
-Примечание: Может быть доступно больше команд EXEC, чем отображается. Это зависит от вашего устройства и используемого образа IOS.    
-## Вопрос:      
-##Чего не хватает в списке команд admin 2, который присутствует в командах admin 1?   
+Is this router connected to internet? [no]: yes
+Enter the number of interfaces facing internet [1]: 
+Interface              IP-Address      OK? Method Status                Protocol
+GigabitEthernet0/0/0   10.2.2.1        YES manual up                    up      
+GigabitEthernet0/0/1   192.168.3.1     YES manual up                    up      
+Serial0/1/0            unassigned      YES unset  up                    up      
+Serial0/1/1            unassigned      YES unset  up                    up      
+Enter the interface name that is facing internet: GigabitEthernet0/0/0
 
-Команд конфигурирования и отладки.  
+Securing Management plane services..
 
-### Шаг 6: Создайте техническое представление, установите пароль и назначьте привилегии.    
-a. Технический пользователь обычно устанавливает устройства конечного пользователя и кабели. Техническим пользователям разрешено     использовать только выбранные команды   показа.  
-b. Используйте команду включить просмотр, чтобы включить корневой просмотр, и введите секретный пароль включения cisco12345.    
-R1# enable view    
-Password: cisco12345    
-c. Используйте следующую команду для создания технического представления.    
-R1(config)# parser view tech   
+Disabling service finger
+Disabling service pad
+Disabling udp & tcp small servers
+Enabling service password encryption
+Enabling service tcp-keepalives-in
+Enabling service tcp-keepalives-out
+Disabling the cdp protocol
 
-R1(config-view)#%PARSER-6-VIEW_CREATED: view 'tech' successfully created.  
+Disabling the bootp server
+Disabling the http server
+Disabling the finger service
+Disabling source routing
+Disabling gratuitous arp
 
-d. Свяжите техническое представление с паролем.    
-R1(config-view)# secret techpasswd    
-e. Добавьте следующие команды отображения в представление, а затем выйдите из режима настройки представления.    
-R1(config-view)# commands exec include show version    
-R1(config-view)# commands exec include show interfaces    
-R1(config-view)# commands exec include show ip interface brief   
-R1(config-view)# commands exec include show parser view   
-R1(config-view)# end   
-f. Проверьте техническое представление.    
-R1# enable view tech    
-Password: techpasswd  
+Here is a sample Security Banner to be shown
+at every access to device. Modify it to suit your
+enterprise requirements.
 
-R1#%PARSER-6-VIEW_SWITCH: successfully set to view 'tech'.  
+Authorized Access only
+  This system is the property of So-&-So-Enterprise.
+  UNAUTHORIZED ACCESS TO THIS DEVICE IS PROHIBITED.
+  You must have explicit permission to access this
+  device. All activities performed on this device
+  are logged. Any violations of access policy will result
+  in disciplinary action.
 
-R1# show parser view  
-Current view is ‘tech’   
-g. Изучите команды, доступные в техническом представлении.    
-R1#?  
-Exec commands:  
-  disable     Turn off privileged commands  
-  enable      Turn on privileged commands  
-  exit        Exit from the EXEC  
-  logout      Exit from the EXEC  
-  show        Show running system information  
-Примечание: Может быть доступно больше команд EXEC, чем отображается. Это зависит от вашего устройства и используемого образа IOS.    
-* h. Изучите команды отображения, доступные в техническом представлении.  *
-R1#show ?  
-  interfaces         Interface status and configuration  
-  ip                 IP information  
-  parser             Show parser commands  
-  version            System hardware and software status  
-Примечание: Может быть доступно больше команд EXEC, чем отображается. Это зависит от вашего устройства и используемого образа IOS.  
-*i. Выполните краткую команду показать ip-интерфейс.*  
-R1#show ip interface  
-GigabitEthernet0/0/0 is up, line protocol is up (connected)  
-  Internet address is 192.168.1.1/24  
-  Broadcast address is 255.255.255.255  
-  Address determined by setup command  
-  MTU is 1500 bytes  
-  Helper address is not set  
-  Directed broadcast forwarding is disabled  
-  Outgoing access list is not set  
-  Inbound  access list is not set  
-  Proxy ARP is enabled  
-  Security level is default  
-  Split horizon is enabled  
-  ICMP redirects are always sent  
-  ICMP unreachables are always sent  
-  ICMP mask replies are never sent  
-  IP fast switching is disabled  
-  IP fast switching on the same interface is disabled  
-  IP Flow switching is disabled  
-  IP Fast switching turbo vector  
-  IP multicast fast switching is disabled  
-  IP multicast distributed fast switching is disabled  
-  Router Discovery is disabled  
- --More--  
- 
-## Вопрос:      
-## Смогли ли вы сделать это как технический пользователь? Объяснять.    
-## Введите свои ответы здесь.    
-Да.Данная команда доступна для технического пользователя.(Представление Tech)   
+Enter the security banner {Put the banner between
+k and k, where k is any character}:
+# Unauthorized Access Prohibited #
+Enable secret is either not configured or
+ is the same as the enable password
+Enter the new enable secret: cisco12345
+Confirm the enable secret : cisco12345
+Enter the new enable password: 12345cisco
+Confirm the enable password: 12345cisco
 
-*j. Выполните команду показать ip-маршрут.*  
+Configuration of local user database
+Enter the username: admin
+Enter the password: adminpasswd
+Confirm the password: adminpasswd
+Configuring AAA local authentication
+Configuring console, Aux and vty lines for
+local authentication, exec-timeout, transport
+Securing device against Login Attacks
+Configure the following parameters
 
-R1#show ip route  
-           ^
-% Invalid input detected at '^' marker.  
-## Вопрос:   
-## Смогли ли вы сделать это как технический пользователь?    
-## Введите свои ответы здесь.  
-Данная команда не доступная техническому пользователю.(Представление Tech)  
+Blocking Period when Login Attack detected: 60
 
-*k. Вернитесь к корневому просмотру с помощью команды включить просмотр. *   
-R1# enable view        
-Пароль: cisco12345        
-*l. Выполните команду show run, чтобы просмотреть созданные вами представления.*    
+Maximum Login failures with the device: 2
 
-parser view tech  
- secret 5 $1$mERr$QMUdu4f7Qgk/Gy0quE8Eh0  
- commands exec include show  
- commands exec include show interfaces  
- commands exec include show ip  
- commands exec include show ip interface  
- commands exec include show ip interface brief  
- commands exec include show parser  
- commands exec include show parser view  
- commands exec include show version             
+Maximum time period for crossing the failed login attempts: 30
 
-## Вопрос:         
-## Для технического просмотра, почему перечислены команды show и show ip, а также show ip interface и show ip interface brief?      
-## Введите свои ответы здесь.  
-Для доступа к командам  
-show ?  
-show ip ?  
-show ip interface ?  
-show ip interface brief  
-*m. Настройте те же административные роли на маршрутизаторе R3.*     
-         
-### Шаг 7: Сохраните конфигурацию на маршрутизаторах R1 и R3.    
-Сохраните текущую конфигурацию в конфигурации запуска из привилегированной командной строки EXEC.   
-R1#copy running-config startup-config  
-Destination filename [startup-config]?   
-Building configuration...  
-[OK]  
-  
+Configure SSH server? [yes]: [Enter]
+Enter the domain-name: www.netsec.com
+
+Configuring interface specific AutoSecure services
+Disabling the following ip services on all interfaces:
+
+ no ip redirects
+ no ip proxy-arp
+ no ip unreachables
+ no ip directed-broadcast
+ no ip mask-reply
+
+Securing Forwarding plane services..
+
+Enabling unicast rpf on all interfaces connected
+to internet
+
+Configure CBAC Firewall feature? [yes/no]: no
+
+This is the configuration generated:
+
+no service finger
+no service pad
+no service udp-small-servers
+no service tcp-small-servers
+service password-encryption
+service tcp-keepalives-in
+service tcp-keepalives-out
+no cdp run
+no ip bootp server
+no ip http server
+no ip finger
+no ip source-route
+no ip gratuitous-arps
+banner motd ^C  Unauthorized Access Prohibited ^C
+security passwords min-length 6
+security authentication failure rate 10 log
+enable secret 5 $1$lubv$Rdx4gHUcijbxV7p2z76/71
+enable password 7 110A1016141D5D5B5C737B
+username admin password 7 02050D4808095E731F1A5C
+aaa new-model
+aaa authentication login local_auth local
+line console 0
+ login authentication local_auth
+ exec-timeout 5 0
+ transport output telnet
+line aux 0
+ login authentication local_auth
+ exec-timeout 10 0
+ transport output telnet
+line vty 0 4
+ login authentication local_auth
+ transport input telnet
+line tty 1
+ login authentication local_auth
+ exec-timeout 15 0
+login block-for 60 attempts 2 within 30
+ip domain-name www.netsec.com
+crypto key generate rsa general-keys modulus 1024
+ip ssh time-out 60
+ip ssh authentication-retries 2
+line vty 0 4
+ transport input ssh telnet
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+logging facility local2
+logging trap debugging
+service sequence-numbers
+logging console critical
+logging buffered
+int GigabitEthernet0/0/0
+ no ip redirects
+ no ip proxy-arp
+ no ip unreachables
+ no ip directed-broadcast
+ no ip mask-reply
+int GigabitEthernet0/0/1
+ no ip redirects
+ no ip proxy-arp
+ no ip unreachables
+ no ip directed-broadcast
+ no ip mask-reply
+ip access-list extended 100
+ permit udp any any eq bootpc
+interface GigabitEthernet0/0/0
+ ip verify unicast source reachable-via rx 100
+!
+end
+
+
+Apply this configuration to running-config? [yes]: [Enter]
+
+Applying the config generated to running-config
+
+ WARNING: Command has been added to the configuration using a type 5 password. However, type 5 passwords will soon be deprecated. Migrate to a supported password type
+ WARNING: Command has been added to the configuration using a type 7 password. However, type 7 passwords will soon be deprecated. Migrate to a supported password type
+ WARNING: Command has been added to the configuration using a type 7 password. However, type 7 passwords will soon be deprecated. Migrate to a supported password typeThe name for the keys will be: R3.www.netsec.com
+
+% The key modulus size is 1024 bits
+% Generating 1024 bit RSA keys, keys will be non-exportable...
+[OK] (elapsed time was 0 seconds)
+
+R3#
+
+Примечание: Задаваемые вопросы и выходные данные могут отличаться в зависимости от функций образа IOS и устройства.
+
+## Шаг 2: Установите SSH-соединение с PC-C на R3.
+a. Запустите PuTTY или другой SSH-клиент и войдите в систему с учетной записью администратора и паролем adminpasswd, созданными при запуске AutoSecure. Введите IP-адрес интерфейса R3 G0/0/1 192.168.3.1.
+b. Поскольку SSH был настроен с использованием AutoSecure на R3, вы получите предупреждение о безопасности PuTTY. Нажмите кнопку Да, чтобы подключиться в любом случае.
+c. Войдите в привилегированный режим EXEC с паролем cisco12345 и проверьте конфигурацию R3 с помощью команды show run.
+
+
+
+
