@@ -248,7 +248,42 @@ Class-map: CONFROOM_PROTOCOLS (match-any)
       Match: any 
       Drop (default action)
         0 packets, 0 bytes <output omitted>
+Шаг 7: Назначьте Интерфейсы соответствующим зонам безопасности
+Интерфейсы (физические и логические) назначаются зонам безопасности с помощью команды zone-member security interface.
+a. Назначьте G0/0 R3 для зоны безопасности CONF ROOM:
+R3(config)# interface g0/0/1.33
+R3(config-if)# zone-member security CONFROOM
+b. Присвоите G0/1 R3 зоне безопасности INSIDE:  
+R3(config)# interface g0/0/1.3
+R3(config-if)# zone-member security INSIDE
+c. Назначьте g0/0/1 R3 для зоны безопасности INTERNET:
+R3(config)# interface g0/0/0
+R3(config-if)# zone-member security INTERNET
+Шаг 8: Проверьте назначение зоны
+a. Выполните команду show zone security, чтобы убедиться, что зоны были созданы правильно, а интерфейсы назначены правильно:
+R3# show zone security
+zone self
+  Description: System defined zone
 
+zone service
+  Description: System defined zone
+
+zone INSIDE
+  Member Interfaces:
+    GigabitEthernet0/0/1.3
+
+zone CONFROOM
+  Member Interfaces:
+    GigabitEthernet0/0/1.33
+
+zone INTERNET
+  Member Interfaces:
+    GigabitEthernet0/0/0 
+b. Несмотря на то, что не было выдано никаких команд для создания зоны “self”, в приведенном выше выводе она все равно отображается.
+Почему R3 отображает зону с именем “self”? В чем значение этой зоны?
+## Часть 3: Проверка функциональности брандмауэра ZPF   
+### Шаг 1: Трафик, исходящий из Интернета  
+a. Чтобы проверить эффективность брандмауэра, выполните ping PC-B с PC-A. В PC-A откройте командную строку и отправьте запрос на 192.168.3.3  
 
 
 
