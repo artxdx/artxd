@@ -66,21 +66,59 @@ c. На R3 используйте следующую команду.
 R3(config)# ip route 0.0.0.0 0.0.0.0 10.2.2.2    
 ### Шаг 5: Настройте S3.  
 a. Настройка магистрального канала:  
-S3(config)# interface f0/5  
+S3(config)# interface e0/0  
 S3(config-if)# switchport mode trunk  
 b. Настройте порты доступа.  
-S3(config)# interface f0/18  
-S3(config-if)# switchport mode access  
+S3(config)# vlan 3 -создаем vlan 3
+S3(config)# interface e0/2  
+S3(config-if)# switchport mode access 
 S3(config-if)# switchport access vlan 3  
-S3(config-if)# interface f0/23  
+S3(config)# vlan 33 -создаем vlan 33
+S3(config-if)# interface e0/1  
 S3(config-if)# switchport mode access  
-S3(config-if)# switchport access vlan 33  
+S3(config-if)# switchport access vlan 33 
+
 ### Шаг 6: Настройте параметры IP-адреса хоста ПК.  
-Настройте статический IP-адрес, маску подсети и шлюз по умолчанию для PC-A, PC-B и PC-C, как показано в таблице IP-адресации.   
+Настройте статический IP-адрес, маску подсети и шлюз по умолчанию для PC-A, PC-B и PC-C, как показано в таблице IP-адресации. 
+PC-A
+ip 192.168.1.3 255.255.255.0 192.168.1.1
+Checking for duplicate address...
+PC1 : 192.168.1.3 255.255.255.0 gateway 192.168.1.1
+
 ### Шаг 7: Проверьте базовое сетевое подключение.  
 a. Выполните пинг от R1 до R3.  
+R1#ping 10.2.2.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.2.2.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 4/4/5 ms
+
 Если запросы не прошли успешно, устраните неполадки в основных конфигурациях устройства, прежде чем продолжить.   
-b. Выполните пинг с ПК-A в локальной сети R1 на ПК-B и ПК-C в локальной сети R3.  
+b. Выполните пинг с ПК-A в локальной сети R1 на ПК-B и ПК-C в локальной сети R3. 
+VPCS> ping 192.168.3.1
+
+84 bytes from 192.168.3.1 icmp_seq=1 ttl=253 time=4.827 ms
+84 bytes from 192.168.3.1 icmp_seq=2 ttl=253 time=3.449 ms
+84 bytes from 192.168.3.1 icmp_seq=3 ttl=253 time=3.332 ms
+84 bytes from 192.168.3.1 icmp_seq=4 ttl=253 time=3.428 ms
+84 bytes from 192.168.3.1 icmp_seq=5 ttl=253 time=3.680 ms
+
+VPCS> ping 192.168.3.3
+
+192.168.3.3 icmp_seq=1 timeout
+192.168.3.3 icmp_seq=2 timeout
+192.168.3.3 icmp_seq=3 timeout
+192.168.3.3 icmp_seq=4 timeout
+192.168.3.3 icmp_seq=5 timeout
+
+VPCS> ping 192.168.33.3
+
+192.168.33.3 icmp_seq=1 timeout
+192.168.33.3 icmp_seq=2 timeout
+192.168.33.3 icmp_seq=3 timeout
+192.168.33.3 icmp_seq=4 timeout
+192.168.33.3 icmp_seq=5 timeout
+
 Если запросы не прошли успешно, устраните неполадки в основных конфигурациях устройства, прежде чем продолжить.  
 Примечание: Если вы можете выполнить пинг с ПК-A на ПК-C, вы продемонстрировали, что достигнута сквозная доступность IP-адреса. Если вы не можете выполнить поиск, но интерфейсы устройств подключены, а IP-адреса указаны правильно, используйте команды показать интерфейс, показать ip-интерфейс и показать ip-маршрут, чтобы помочь выявить проблемы.   
 ### Шаг 8: Настройте учетную запись пользователя, зашифрованные пароли и крипто-ключи для SSH.   
