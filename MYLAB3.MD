@@ -426,7 +426,209 @@ R3#
 a. Запустите PuTTY или другой SSH-клиент и войдите в систему с учетной записью администратора и паролем adminpasswd, созданными при запуске AutoSecure. Введите IP-адрес интерфейса R3 G0/0/1 192.168.3.1.
 b. Поскольку SSH был настроен с использованием AutoSecure на R3, вы получите предупреждение о безопасности PuTTY. Нажмите кнопку Да, чтобы подключиться в любом случае.
 c. Войдите в привилегированный режим EXEC с паролем cisco12345 и проверьте конфигурацию R3 с помощью команды show run.
+
 ![](SSh.jpg)
 
+Current configuration : 4444 bytes
+!
+! Last configuration change at 21:42:02 UTC Sat Jun 25 2022
+!
+version 15.5
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+service password-encryption
+service sequence-numbers
+!
+hostname R3
+!
+boot-start-marker
+boot-end-marker
+!
+!
+security authentication failure rate 10 log
+security passwords min-length 6
+logging console critical
+enable secret 5 $1$xfXC$ZU7sZmPJs25AhFSuWKUwe0
+enable password 7 00554155500E080F1C2243
+!
+aaa new-model
+!
+!
+aaa authentication login local_auth local
+!
+!
+!
+!
+!
+aaa session-id common
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+no ip source-route
+no ip gratuitous-arps
+!
+!
+!
+!
+!
+!
+no ip bootp server
+no ip domain lookup
+ip domain name www.netsec.com
+ip cef
+login block-for 60 attempts 2 within 30
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+archive
+ log config
+  logging enable
+username admin password 7 070E25414707090404011C08
+!
+redundancy
+!
+no cdp run
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ ip address 10.2.2.1 255.255.255.252
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip verify unicast source reachable-via rx allow-default 100
+ duplex auto
+ speed auto
+ media-type rj45
+ no mop enabled
+!
+interface GigabitEthernet0/1
+ ip address 192.168.3.1 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ duplex auto
+ speed auto
+ media-type rj45
+ no mop enabled
+!
+interface GigabitEthernet0/2
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+ no mop enabled
+!
+interface GigabitEthernet0/3
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+ no mop enabled
+!
+router ospf 1
+ passive-interface GigabitEthernet0/1
+ network 10.2.2.0 0.0.0.3 area 0
+ network 192.168.3.0 0.0.0.255 area 0
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip ssh time-out 60
+ip ssh authentication-retries 2
+!
+!
+logging trap debugging
+logging facility local2
+!
+!
+access-list 100 permit udp any any eq bootpc
+!
+!
+!
+control-plane
+!
+banner exec ^C
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************^C
+banner incoming ^C
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************^C
+banner login ^C
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************^C
+banner motd ^C Unauthorized Access Prohibited ^C
+!
+line con 0
+ exec-timeout 5 0
+ login authentication local_auth
+ transport output telnet
+line aux 0
+ exec-timeout 15 0
+ login authentication local_auth
+ transport output telnet
+line vty 0 4
+ login authentication local_auth
+ transport input telnet ssh
+!
+no scheduler allocate
+!
+end
 
 
