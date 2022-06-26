@@ -154,7 +154,104 @@ R3(config)# zone security INTERNET
 Во-первых, вы создадите карты классов. После создания карт классов вы создадите карты политик и прикрепите карты классов к картам политик.
 a. Создайте карту классов проверки, чтобы сопоставить трафик, который должен быть разрешен из ВНУТРЕННЕЙ зоны в зону Интернета. Поскольку мы доверяем ВНУТРЕННЕЙ зоне, мы разрешаем все основные протоколы.
 В приведенных ниже командах первая строка создает карту классов inspect. Ключевое слово match-any указывает маршрутизатору, что любая из инструкций протокола сопоставления будет квалифицироваться как успешное совпадение, приводящее к применению политики. Результатом является совпадение пакетов TCP, UDP или ICMP.
-Команды сопоставления относятся к конкретным протоколам, поддерживаемым Cisco NBAR. Для получения дополнительной информации выполните поиск в Интернете для Cisco NBAR.    
+Команды сопоставления относятся к конкретным протоколам, поддерживаемым Cisco NBAR. Для получения дополнительной информации выполните поиск в Интернете для Cisco NBAR.  R3(config)# class-map type inspect match-any INSIDE_PROTOCOLS
+R3(config-cmap)# match protocol tcp
+R3(config-cmap)# match protocol udp
+R3(config-cmap)# match protocol icmp
+б. Аналогичным образом создайте карту классов, чтобы соответствовать разрешенному трафику из зоны CONF ROOM в зону Интернета. Поскольку мы не полностью доверяем зоне CONF ROOM, мы должны ограничить то, что сервер может отправлять в Интернет:
+R3(config)# class-map type inspect match-any CONFROOM_PROTOCOLS
+R3(config-cmap)# match protocol http
+R3(config-cmap)# match protocol https
+R3(config-cmap)# match protocol dns
+c. Теперь, когда карты классов созданы, вы можете создать карты политик.
+В приведенных ниже командах первая строка создает карту политики проверки с именем INSIDE_TO_INTERNET. Вторая строка привязывает ранее созданную карту классов INSIDE_PROTOCOLS к карте политик. Все пакеты, которым соответствует карта классов INSIDE_PROTOCOLS, будут подвергнуты действию, предпринятому картой политики INSIDE_TO_INTERNET. Наконец, третья строка определяет фактическое действие, которое эта карта политики будет применять к сопоставленным пакетам. В этом случае будут проверены совпадающие пакеты.
+Следующие три строки создают аналогичную карту политик с именем CONF ROOM_TO_INTERNET и присоединяют карту классов CONF ROOM_PROTOCOLS.
+Команды следующие:
+R3(config)# policy-map type inspect INSIDE_TO_INTERNET
+R3(config-pmap)# class type inspect INSIDE_PROTOCOLS
+R3(config-pmap-c)# inspect
+R3(config)# policy-map type inspect CONFROOM_TO_INTERNET
+R3(config-pmap)# class type inspect CONFROOM_PROTOCOLS
+R3(config-pmap-c)# inspect
+### Шаг 5: Создайте пары зон
+Пара зон позволяет указать однонаправленную политику брандмауэра между двумя зонами безопасности.
+Например, обычно используемая политика безопасности диктует, что внутренняя сеть может инициировать любой трафик, направленный в Интернет, но ни одному трафику, исходящему из Интернета, не должно быть разрешено достигать внутренней сети.
+Для этой политики трафика требуется только одна пара зон, ВНУТРЕННЯЯ для ИНТЕРНЕТА. Поскольку пары зон определяют однонаправленный поток трафика, необходимо создать другую пару зон, если трафик, инициируемый Интернетом, должен проходить через Интернет во ВНУТРЕННЕМ направлении.
+Обратите внимание, что Cisco ZPF может быть сконфигурирован для проверки трафика, который движется в направлении, определенном парой зон. В этой ситуации брандмауэр отслеживает трафик и динамически создает правила, позволяющие обратному или связанному трафику проходить обратно через маршрутизатор.
+Чтобы определить пару зон, используйте команду безопасности пары зон. Направление трафика определяется зонами источника и назначения.
+Для этой лабораторной работы вы создадите две пары зон:  
+INSIDE_TO_INTERNET: Позволяет трафику выходить из внутренней сети в Интернет.    
+CONFORM_TO_INTERNET: Разрешает доступ в Интернет из сети Конференц-зала.    
+a. Создание зонных пар:   
+R3(config)# zone-pair security INSIDE_TO_INTERNET source INSIDE destination INTERNET  
+R3(config)# zone-pair security CONFROOM_TO_INTERNET source CONFROOM destination INTERNET  
+b. Убедитесь, что пары зон были созданы правильно, выполнив команду show zone-pair security . Обратите внимание, что никакие политики еще не связаны с парами зон. Политики безопасности будут применены к парам зон на следующем шаге.  
+R3# show zone-pair security  
+Zone-pair name INSIDE_TO_INTERNET  
+    Source-Zone INSIDE  Destination-Zone INTERNET  
+    service-policy not configured  
+Zone-pair name CONFROOM_TO_INTERNET  
+    Source-Zone CONFROOM  Destination-Zone INTERNET  
+    service-policy not configured   
+Шаг 6: Применение политик безопасности
+a. В качестве последнего шага настройки примените карты политик к парам зон:  
+R3(config)# zone-pair security INSIDE_TO_INTERNET  
+R3(config-sec-zone-pair)# service-policy type inspect INSIDE_TO_INTERNET  
+R3(config)# zone-pair security CONFROOM_TO_INTERNET  
+R3(config-sec-zone-pair)# service-policy type inspect CONFROOM_TO_INTERNET  
+b. Еще раз выполните команду show zone-pair security, чтобы проверить конфигурацию пары зон. Обратите внимание, что теперь отображаются политики обслуживания:
+R3# show zone-pair security
+Zone-pair name INSIDE_TO_INTERNET
+    Source-Zone INSIDE  Destination-Zone INTERNET 
+    service-policy INSIDE_TO_INTERNET
+Zone-pair name CONFROOM_TO_INTERNET
+    Source-Zone CONFROOM  Destination-Zone INTERNET 
+    service-policy CONFROOM_TO_INTERNET
+c. Чтобы получить дополнительную информацию о парах зон, их картах политик, картах классов и счетчиках совпадений, используйте команду показать тип карты политики для проверки пары зон:  
+R3# show policy-map type inspect zone-pair
+Zone-pair: CONFROOM_TO_INTERNET 
+  Service-policy inspect : CONFROOM_TO_INTERNET
+Class-map: CONFROOM_PROTOCOLS (match-any)  
+      Match: protocol http
+      Match: protocol https
+      Match: protocol dns
+      Inspect
+        Session creations since subsystem startup or last reset 0
+        Current session counts (estab/half-open/terminating) [0:0:0]
+        Maxever session counts (estab/half-open/terminating) [0:0:0]
+        Last session created never
+        Last statistic reset never
+        Last session creation rate 0
+        Last half-open session total 0
+
+    Class-map: class-default (match-any)  
+      Match: any 
+      Drop (default action)
+        0 packets, 0 bytes
+  Zone-pair: INSIDE_TO_INTERNET 
+  Service-policy inspect : INSIDE_TO_INTERNET
+
+    Class-map: INSIDE_PROTOCOLS (match-any)  
+      Match: protocol tcp
+      Match: protocol udp
+      Match: protocol icmp
+      Inspect
+        Session creations since subsystem startup or last reset 0
+        Current session counts (estab/half-open/terminating) [0:0:0]
+        Maxever session counts (estab/half-open/terminating) [0:0:0]
+        Last session created never
+        Last statistic reset never
+        Last session creation rate 0
+        Last half-open session total 0
+
+    Class-map: class-default (match-any)  
+      Match: any 
+      Drop (default action)
+        0 packets, 0 bytes <output omitted>
+
+
+
+
 
 б. Чтобы маршрутизатор не пытался перевести неправильно введенные команды, как если бы они были именами хостов, отключите поиск DNS.  R1 показан здесь в качестве примера.      
 R1(config)# no ip domain-lookup  
