@@ -392,16 +392,16 @@ host (192.168.3.1) not reachable
 
 b.выполните ping PC-C с PC-A. В PC-A откройте командную строку и отправьте запрос на 192.168.33.3   
 PCC> ping 192.168.1.3  
-host (192.168.33.1) not reachable  
+host (192.168.33.1) not reachable   
 
 PCA> ping 192.168.33.3  
-192.168.33.3 icmp_seq=1 timeout  
-192.168.33.3 icmp_seq=2 timeout  
-192.168.33.3 icmp_seq=3 timeout  
-192.168.33.3 icmp_seq=4 timeout  
-192.168.33.3 icmp_seq=5 timeout  
+192.168.33.3 icmp_seq=1 timeout    
+192.168.33.3 icmp_seq=2 timeout    
+192.168.33.3 icmp_seq=3 timeout    
+192.168.33.3 icmp_seq=4 timeout    
+192.168.33.3 icmp_seq=5 timeout    
 
-c.выполните ping PC-C с PC-B. В PC-B откройте командную строку и отправьте запрос на 192.168.1.3 	
+c.выполните ping PC-C с PC-B. В PC-B откройте командную строку и отправьте запрос на 192.168.1.3   	
 
 PC-C:\> ping 192.168.3.1  
 host (192.168.33.1) not reachable  
@@ -425,30 +425,30 @@ host (192.168.33.1) not reachable
 
 ### Дополнительно.  
 Создайте соответствующую пару зон, карты классов и карты политик и настройте R3, чтобы предотвратить попадание исходящего из Интернета трафика в Собственную зону.  
-R3(config)#class-map type inspect match-any INTERNET_PROTOCOLS  - Создаем карту классов протоколов исходящего трафика из интернета
-R3(config-cmap)#match protocol tcp
-R3(config-cmap)#match protocol udp
-R3(config-cmap)#match protocol icmp
-R3(config-cmap)#EXIT
-R3(config)#policy-map type inspect INTERNET_TO_INSIDE   создаем карту политик
-R3(config-pmap)#class type inspect INTERNET_PROTOCOLS
-R3(config-pmap-c)#inspect
+R3(config)#class-map type inspect match-any INTERNET_PROTOCOLS  - Создаем карту классов протоколов исходящего трафика из интернета  
+R3(config-cmap)#match protocol tcp  
+R3(config-cmap)#match protocol udp  
+R3(config-cmap)#match protocol icmp  
+R3(config-cmap)#EXIT  
+R3(config)#policy-map type inspect INTERNET_TO_INSIDE   создаем карту политик  
+R3(config-pmap)#class type inspect INTERNET_PROTOCOLS  
+R3(config-pmap-c)#inspect  
 R3(config-pmap-c)#exit
-R3(config-pmap)#exit
-R3(config)#$ecurity INTERNET_TO_INSIDE source INTERNET destination INSIDE  создаем пару зон
-R3(config-sec-zone-pair)#service-policy type inspect INTERNET_TO_INSIDE
-R3(config-sec-zone-pair)#EXIT
+R3(config-pmap)#exit  
+R3(config)#$ecurity INTERNET_TO_INSIDE source INTERNET destination INSIDE  создаем пару зон  
+R3(config-sec-zone-pair)#service-policy type inspect INTERNET_TO_INSIDE  
+R3(config-sec-zone-pair)#EXIT  
 
-show zone-pair security
-Zone-pair name INSIDE_TO_INTERNET
-    Source-Zone INSIDE  Destination-Zone INTERNET
-    service-policy INSIDE_TO_INTERNET
-Zone-pair name CONFROOM_TO_INTERNET
-    Source-Zone CONFROOM  Destination-Zone INTERNET
-    service-policy CONFROOM_TO_INTERNET
-Zone-pair name INTERNET_TO_INSIDE
-    Source-Zone INTERNET  Destination-Zone INSIDE
-    service-policy INTERNET_TO_INSIDE
+show zone-pair security  
+Zone-pair name INSIDE_TO_INTERNET  
+    Source-Zone INSIDE  Destination-Zone INTERNET  
+    service-policy INSIDE_TO_INTERNET  
+Zone-pair name CONFROOM_TO_INTERNET  
+    Source-Zone CONFROOM  Destination-Zone INTERNET  
+    service-policy CONFROOM_TO_INTERNET  
+Zone-pair name INTERNET_TO_INSIDE  
+    Source-Zone INTERNET  Destination-Zone INSIDE  
+    service-policy INTERNET_TO_INSIDE  
 
 
 ### Приложение.  
