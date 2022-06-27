@@ -266,188 +266,188 @@ R3(config-pmap-c)# inspect
 Чтобы определить пару зон, используйте команду безопасности пары зон. Направление трафика определяется зонами источника и назначения.
 Для этой лабораторной работы вы создадите две пары зон:  
 INSIDE_TO_INTERNET: Позволяет трафику выходить из внутренней сети в Интернет.    
-CONFORM_TO_INTERNET: Разрешает доступ в Интернет из сети Конференц-зала.    
-a. Создание зонных пар:   
-R3(config)# zone-pair security INSIDE_TO_INTERNET source INSIDE destination INTERNET  
-R3(config)# zone-pair security CONFROOM_TO_INTERNET source CONFROOM destination INTERNET  
+CONFORM_TO_INTERNET: Разрешает доступ в Интернет из сети Конференц-зала.     
+a. Создание зонных пар:    
+R3(config)# zone-pair security INSIDE_TO_INTERNET source INSIDE destination INTERNET   
+R3(config)# zone-pair security CONFROOM_TO_INTERNET source CONFROOM destination INTERNET   
 b. Убедитесь, что пары зон были созданы правильно, выполнив команду show zone-pair security . Обратите внимание, что никакие политики еще не связаны с парами зон. Политики безопасности будут применены к парам зон на следующем шаге.  
 R3# show zone-pair security  
-Zone-pair name INSIDE_TO_INTERNET  
-    Source-Zone INSIDE  Destination-Zone INTERNET  
-    service-policy not configured  
-Zone-pair name CONFROOM_TO_INTERNET  
-    Source-Zone CONFROOM  Destination-Zone INTERNET  
+Zone-pair name INSIDE_TO_INTERNET   
+    Source-Zone INSIDE  Destination-Zone INTERNET   
     service-policy not configured   
-Шаг 6: Прcименение политик безопасности
-a. В качестве последнего шага настройки примените карты политик к парам зон:  
-R3(config)# zone-pair security INSIDE_TO_INTERNET  
-R3(config-sec-zone-pair)# service-policy type inspect INSIDE_TO_INTERNET  
-R3(config)# zone-pair security CONFROOM_TO_INTERNET  
-R3(config-sec-zone-pair)# service-policy type inspect CONFROOM_TO_INTERNET  
-b. Еще раз выполните команду show zone-pair security, чтобы проверить конфигурацию пары зон. Обратите внимание, что теперь отображаются политики обслуживания:
-R3# show zone-pair security
-Zone-pair name INSIDE_TO_INTERNET
-    Source-Zone INSIDE  Destination-Zone INTERNET 
-    service-policy INSIDE_TO_INTERNET
-Zone-pair name CONFROOM_TO_INTERNET
-    Source-Zone CONFROOM  Destination-Zone INTERNET 
-    service-policy CONFROOM_TO_INTERNET
-c. Чтобы получить дополнительную информацию о парах зон, их картах политик, картах классов и счетчиках совпадений, используйте команду показать тип карты политики для проверки пары зон:  
-R3# show policy-map type inspect zone-pair
-Zone-pair: CONFROOM_TO_INTERNET 
-  Service-policy inspect : CONFROOM_TO_INTERNET
+Zone-pair name CONFROOM_TO_INTERNET   
+    Source-Zone CONFROOM  Destination-Zone INTERNET    
+    service-policy not configured     
+Шаг 6: Прcименение политик безопасности  
+a. В качестве последнего шага настройки примените карты политик к парам зон:    
+R3(config)# zone-pair security INSIDE_TO_INTERNET    
+R3(config-sec-zone-pair)# service-policy type inspect INSIDE_TO_INTERNET    
+R3(config)# zone-pair security CONFROOM_TO_INTERNET    
+R3(config-sec-zone-pair)# service-policy type inspect CONFROOM_TO_INTERNET    
+b. Еще раз выполните команду show zone-pair security, чтобы проверить конфигурацию пары зон. Обратите внимание, что теперь отображаются политики обслуживания:  
+R3# show zone-pair security  
+Zone-pair name INSIDE_TO_INTERNET  
+    Source-Zone INSIDE  Destination-Zone INTERNET   
+    service-policy INSIDE_TO_INTERNET  
+Zone-pair name CONFROOM_TO_INTERNET  
+    Source-Zone CONFROOM  Destination-Zone INTERNET   
+    service-policy CONFROOM_TO_INTERNET  
+c. Чтобы получить дополнительную информацию о парах зон, их картах политик, картах классов и счетчиках совпадений, используйте команду показать тип карты политики для проверки пары зон:   
+R3# show policy-map type inspect zone-pair  
+Zone-pair: CONFROOM_TO_INTERNET   
+  Service-policy inspect : CONFROOM_TO_INTERNET  
 Class-map: CONFROOM_PROTOCOLS (match-any)  
-      Match: protocol http
-      Match: protocol https
-      Match: protocol dns
-      Inspect
-        Session creations since subsystem startup or last reset 0
-        Current session counts (estab/half-open/terminating) [0:0:0]
-        Maxever session counts (estab/half-open/terminating) [0:0:0]
-        Last session created never
-        Last statistic reset never
-        Last session creation rate 0
-        Last half-open session total 0
+      Match: protocol http  
+      Match: protocol https  
+      Match: protocol dns  
+      Inspect  
+        Session creations since subsystem startup or last reset 0  
+        Current session counts (estab/half-open/terminating) [0:0:0]  
+        Maxever session counts (estab/half-open/terminating) [0:0:0]  
+        Last session created never  
+        Last statistic reset never  
+        Last session creation rate 0  
+        Last half-open session total 0  
 
-    Class-map: class-default (match-any)  
-      Match: any 
-      Drop (default action)
-        0 packets, 0 bytes
-  Zone-pair: INSIDE_TO_INTERNET 
-  Service-policy inspect : INSIDE_TO_INTERNET
+    Class-map: class-default (match-any)    
+      Match: any   
+      Drop (default action)  
+        0 packets, 0 bytes  
+  Zone-pair: INSIDE_TO_INTERNET   
+  Service-policy inspect : INSIDE_TO_INTERNET   
 
     Class-map: INSIDE_PROTOCOLS (match-any)  
-      Match: protocol tcp
-      Match: protocol udp
-      Match: protocol icmp
-      Inspect
-        Session creations since subsystem startup or last reset 0
-        Current session counts (estab/half-open/terminating) [0:0:0]
-        Maxever session counts (estab/half-open/terminating) [0:0:0]
-        Last session created never
-        Last statistic reset never
-        Last session creation rate 0
-        Last half-open session total 0
+      Match: protocol tcp  
+      Match: protocol udp  
+      Match: protocol icmp  
+      Inspect  
+        Session creations since subsystem startup or last reset 0  
+        Current session counts (estab/half-open/terminating) [0:0:0]  
+        Maxever session counts (estab/half-open/terminating) [0:0:0]  
+        Last session created never  
+        Last statistic reset never  
+        Last session creation rate 0  
+        Last half-open session total 0  
 
-    Class-map: class-default (match-any)  
-      Match: any 
-      Drop (default action)
-        0 packets, 0 bytes <output omitted>
-Шаг 7: Назначьте Интерфейсы соответствующим зонам безопасности
-Интерфейсы (физические и логические) назначаются зонам безопасности с помощью команды zone-member security interface.
-a. Назначьте G0/0 R3 для зоны безопасности CONF ROOM:
-R3(config)#interface GigabitEthernet0/1.33
-R3(config-subif)#zone-member security CONFROOM
-R3(config-subif)#exit
+    Class-map: class-default (match-any)    
+      Match: any   
+      Drop (default action)  
+        0 packets, 0 bytes <output omitted>  
+Шаг 7: Назначьте Интерфейсы соответствующим зонам безопасности  
+Интерфейсы (физические и логические) назначаются зонам безопасности с помощью команды zone-member security interface.  
+a. Назначьте G0/0 R3 для зоны безопасности CONF ROOM:  
+R3(config)#interface GigabitEthernet0/1.33  
+R3(config-subif)#zone-member security CONFROOM  
+R3(config-subif)#exit  
 
-b. Присвоите G0/1 R3 зоне безопасности INSIDE:  
-R3(config)#interface GigabitEthernet0/1.3
-R3(config-subif)#zone-member security INSIDE
-R3(config-subif)#exit
+b. Присвоите G0/1 R3 зоне безопасности INSIDE:    
+R3(config)#interface GigabitEthernet0/1.3  
+R3(config-subif)#zone-member security INSIDE  
+R3(config-subif)#exit  
 
-c. Назначьте g0/0/0 R3 для зоны безопасности INTERNET:
-R3(config)#interface GigabitEthernet0/0
-R3(config-if)#zone-member security INTERNET
-R3(config-if)#exit
+c. Назначьте g0/0/0 R3 для зоны безопасности INTERNET:  
+R3(config)#interface GigabitEthernet0/0  
+R3(config-if)#zone-member security INTERNET  
+R3(config-if)#exit  
 
-Шаг 8: Проверьте назначение зоны
-a. Выполните команду show zone security, чтобы убедиться, что зоны были созданы правильно, а интерфейсы назначены правильно:
-R3#show zone security
-zone self
-Description: System Defined Zone
+Шаг 8: Проверьте назначение зоны  
+a. Выполните команду show zone security, чтобы убедиться, что зоны были созданы правильно, а интерфейсы назначены правильно:  
+R3#show zone security  
+zone self  
+Description: System Defined Zone  
 
-zone INSIDE
- Member Interfaces:
- GigabitEthernet0/1.3
+zone INSIDE  
+ Member Interfaces:  
+ GigabitEthernet0/1.3  
 
-zone CONFROOM
- Member Interfaces:
- GigabitEthernet0/1.33
+zone CONFROOM  
+ Member Interfaces:  
+ GigabitEthernet0/1.33  
 
-zone INTERNET
- Member Interfaces:
- GigabitEthernet0/0
+zone INTERNET  
+ Member Interfaces:  
+ GigabitEthernet0/0  
 
-b. Несмотря на то, что не было выдано никаких команд для создания зоны “self”, в приведенном выше выводе она все равно отображается.
+b. Несмотря на то, что не было выдано никаких команд для создания зоны “self”, в приведенном выше выводе она все равно отображается.  
 
-## Почему R3 отображает зону с именем “self”? В чем значение этой зоны?
-### Эта специальная зона обрабатывает пакеты, идущие от любого интерфейса маршрутизатора в зону, не являющуюся зоной self (и наоборот)
-### Можно подключиться к данной зоне для восстановления связи между зонами безопасности.
-### Данную зону можно назвать сервисной.
+## Почему R3 отображает зону с именем “self”? В чем значение этой зоны?  
+### Эта специальная зона обрабатывает пакеты, идущие от любого интерфейса маршрутизатора в зону, не являющуюся зоной self (и наоборот)  
+### Можно подключиться к данной зоне для восстановления связи между зонами безопасности.  
+### Данную зону можно назвать сервисной.  
 
-## Часть 3: Проверка функциональности брандмауэра ZPF   
-### Шаг 1: Трафик, исходящий из Интернета  
-a. Чтобы проверить эффективность брандмауэра, выполните ping PC-B с PC-A. В PC-A откройте командную строку и отправьте запрос на 192.168.3.3  
+## Часть 3: Проверка функциональности брандмауэра ZPF    
+### Шаг 1: Трафик, исходящий из Интернета    
+a. Чтобы проверить эффективность брандмауэра, выполните ping PC-B с PC-A. В PC-A откройте командную строку и отправьте запрос на 192.168.3.3    
 
-PC-A> ping 192.168.3.3
-192.168.3.3 icmp_seq=1 timeout
-192.168.3.3 icmp_seq=2 timeout
-192.168.3.3 icmp_seq=3 timeout
-192.168.3.3 icmp_seq=4 timeout
-192.168.3.3 icmp_seq=5 timeout
+PC-A> ping 192.168.3.3  
+192.168.3.3 icmp_seq=1 timeout  
+192.168.3.3 icmp_seq=2 timeout  
+192.168.3.3 icmp_seq=3 timeout  
+192.168.3.3 icmp_seq=4 timeout  
+192.168.3.3 icmp_seq=5 timeout  
 
-PC-B> ping 192.168.1.3
+PC-B> ping 192.168.1.3  
 
-host (192.168.3.1) not reachable
+host (192.168.3.1) not reachable  
 
-b.выполните ping PC-C с PC-A. В PC-A откройте командную строку и отправьте запрос на 192.168.33.3 
-PCC> ping 192.168.1.3
-host (192.168.33.1) not reachable
+b.выполните ping PC-C с PC-A. В PC-A откройте командную строку и отправьте запрос на 192.168.33.3   
+PCC> ping 192.168.1.3  
+host (192.168.33.1) not reachable  
 
-PCA> ping 192.168.33.3
-192.168.33.3 icmp_seq=1 timeout
-192.168.33.3 icmp_seq=2 timeout
-192.168.33.3 icmp_seq=3 timeout
-192.168.33.3 icmp_seq=4 timeout
-192.168.33.3 icmp_seq=5 timeout
+PCA> ping 192.168.33.3  
+192.168.33.3 icmp_seq=1 timeout  
+192.168.33.3 icmp_seq=2 timeout  
+192.168.33.3 icmp_seq=3 timeout  
+192.168.33.3 icmp_seq=4 timeout  
+192.168.33.3 icmp_seq=5 timeout  
 
 c.выполните ping PC-C с PC-B. В PC-B откройте командную строку и отправьте запрос на 192.168.1.3 	
 
-PC-C:\> ping 192.168.3.1
-host (192.168.33.1) not reachable
+PC-C:\> ping 192.168.3.1  
+host (192.168.33.1) not reachable  
 
 
-### Шаг 2:  Проверка Зоны SELF 
-a.C PC-A ping R3 G0/0/1 interface:
-PC-A:\> ping 192.168.3.1 
+### Шаг 2:  Проверка Зоны SELF   
+a.C PC-A ping R3 G0/0/1 interface:  
+PC-A:\> ping 192.168.3.1   
 
-84 bytes from 192.168.3.1 icmp_seq=1 ttl=253 time=3.612 ms
-84 bytes from 192.168.3.1 icmp_seq=2 ttl=253 time=5.297 ms
-84 bytes from 192.168.3.1 icmp_seq=3 ttl=253 time=3.110 ms
-84 bytes from 192.168.3.1 icmp_seq=4 ttl=253 time=3.111 ms
-84 bytes from 192.168.3.1 icmp_seq=5 ttl=253 time=3.431 ms
+84 bytes from 192.168.3.1 icmp_seq=1 ttl=253 time=3.612 ms  
+84 bytes from 192.168.3.1 icmp_seq=2 ttl=253 time=5.297 ms  
+84 bytes from 192.168.3.1 icmp_seq=3 ttl=253 time=3.110 ms  
+84 bytes from 192.168.3.1 icmp_seq=4 ttl=253 time=3.111 ms  
+84 bytes from 192.168.3.1 icmp_seq=5 ttl=253 time=3.431 ms  
 
-b.С PC-C ping R3 G0/0/1 interface:
+b.С PC-C ping R3 G0/0/1 interface:  
 PC-C:\> ping 192.168.3.1  
 
-host (192.168.33.1) not reachable
+host (192.168.33.1) not reachable  
 
-### Дополнительно.
-Создайте соответствующую пару зон, карты классов и карты политик и настройте R3, чтобы предотвратить попадание исходящего из Интернета трафика в Собственную зону.
-### Приложение.
-– Несколько интерфейсов в Одной Зоне 
-Одним из преимуществ брандмауэров ZPF является то, что они хорошо масштабируются по сравнению с классическим брандмауэром. Если в брандмауэр добавлен новый интерфейс с теми же требованиями безопасности, администратор может просто добавить новый интерфейс в качестве члена существующей зоны безопасности. Однако некоторые версии IOS не позволяют устройствам, подключенным к разным интерфейсам одной и той же зоны, взаимодействовать по умолчанию. В этих случаях пара зон должна быть создана с использованием той же зоны, что и исходная и целевая.
-Трафик между аналогично зонированными интерфейсами всегда будет двунаправленным из-за того, что исходная и целевая зоны пары зон совпадают. Из-за этого нет необходимости проверять трафик, чтобы обеспечить автоматическую обработку обратного трафика; обратный трафик всегда будет разрешен, поскольку он всегда будет соответствовать определению пары зон. В этом случае карта политики должна иметь действие pass вместо inspect. Из-за действия pass маршрутизатор не будет проверять пакеты, соответствующие карте политик, он просто перенаправит их по назначению.
-В контексте этой лабораторной работы, если бы R3 имел интерфейс G0 /0/1.2, также назначенный ВНУТРЕННЕЙ зоне, а версия маршрутизатора IOS не поддерживала разрешение трафика между интерфейсами, настроенными для одной и той же зоны, дополнительная конфигурация выглядела бы следующим образом:
-New zone-pair: Inside to Inside; позволяет маршрутизировать трафик между внутренними доверенными интерфейсами.
-Создание карты политик (обратите внимание, что явная карта классов не требуется, поскольку мы используем класс “catch-all” по умолчанию):
-R3(config)# policy-map type inspect inside
-R3(config-pmap)# class class-default
-R3(config-pmap-c)# pass
-Создание пары зон и назначение ей новой карты политик. Обратите внимание, что INSIDE зона является как источником, так и местом назначения пары зон:  
-R3(config)# zone-pair security INSIDE source INSIDE destination INSIDE
-R3(config-sec-zone-pair)# service-policy type inspect inside
-Чтобы проверить существование новой пары, используйте show zone-pair security:  
-R3# show zone-pair security
-Zone-pair name INSIDE_TO_INTERNET
-    Source-Zone INSIDE Destination-Zone INTERNET 
-    service-policy INSIDE_TO_INTERNET
-Zone-pair name CONFROOM_TO_INTERNET
-    Source-Zone CONFROOM  Destination-Zone INTERNET 
-    service-policy CONFROOM_TO_INTERNET
-Zone-pair name INSIDE
-    Source-Zone INSIDE Destination-Zone INSIDE 
-    service-policy inside
+### Дополнительно.  
+Создайте соответствующую пару зон, карты классов и карты политик и настройте R3, чтобы предотвратить попадание исходящего из Интернета трафика в Собственную зону.  
+### Приложение.  
+– Несколько интерфейсов в Одной Зоне   
+Одним из преимуществ брандмауэров ZPF является то, что они хорошо масштабируются по сравнению с классическим брандмауэром. Если в брандмауэр добавлен новый интерфейс с теми же требованиями безопасности, администратор может просто добавить новый интерфейс в качестве члена существующей зоны безопасности. Однако некоторые версии IOS не позволяют устройствам, подключенным к разным интерфейсам одной и той же зоны, взаимодействовать по умолчанию. В этих случаях пара зон должна быть создана с использованием той же зоны, что и исходная и целевая.  
+Трафик между аналогично зонированными интерфейсами всегда будет двунаправленным из-за того, что исходная и целевая зоны пары зон совпадают. Из-за этого нет необходимости проверять трафик, чтобы обеспечить автоматическую обработку обратного трафика; обратный трафик всегда будет разрешен, поскольку он всегда будет  соответствовать определению пары зон. В этом случае карта политики должна иметь действие pass вместо inspect. Из-за действия pass маршрутизатор не будет проверять пакеты, соответствующие карте политик, он просто перенаправит их по назначению.  
+В контексте этой лабораторной работы, если бы R3 имел интерфейс G0 /0/1.2, также назначенный ВНУТРЕННЕЙ зоне, а версия маршрутизатора IOS не поддерживала разрешение трафика между интерфейсами, настроенными для одной и той же зоны, дополнительная конфигурация выглядела бы следующим образом:  
+New zone-pair: Inside to Inside; позволяет маршрутизировать трафик между внутренними доверенными интерфейсами.  
+Создание карты политик (обратите внимание, что явная карта классов не требуется, поскольку мы используем класс “catch-all” по умолчанию):  
+R3(config)# policy-map type inspect inside  
+R3(config-pmap)# class class-default  
+R3(config-pmap-c)# pass  
+Создание пары зон и назначение ей новой карты политик. Обратите внимание, что INSIDE зона является как источником, так и местом назначения пары зон:    
+R3(config)# zone-pair security INSIDE source INSIDE destination INSIDE   
+R3(config-sec-zone-pair)# service-policy type inspect inside  
+Чтобы проверить существование новой пары, используйте show zone-pair security:    
+R3# show zone-pair security  
+Zone-pair name INSIDE_TO_INTERNET  
+    Source-Zone INSIDE Destination-Zone INTERNET   
+    service-policy INSIDE_TO_INTERNET  
+Zone-pair name CONFROOM_TO_INTERNET  
+    Source-Zone CONFROOM  Destination-Zone INTERNET   
+    service-policy CONFROOM_TO_INTERNET  
+Zone-pair name INSIDE  
+    Source-Zone INSIDE Destination-Zone INSIDE   
+    service-policy inside  
 
 
 
