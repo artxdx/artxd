@@ -266,7 +266,259 @@ S1# show spanning-tree interface f0/6 detail
 ### Шаг 3: Включите root guard.
 Root guard - это еще один вариант предотвращения несанкционированных переключений и подмены. Защита Root может быть включена на всех портах коммутатора, которые не являются корневыми портами. Обычно он включен только на портах, подключаемых к пограничным коммутаторам, где никогда не должен приниматься улучшенный BPDU. Каждый коммутатор должен иметь только один корневой порт, который является наилучшим путем к корневому коммутатору.
 a. Следующая команда настраивает root guard на интерфейсе S2 G0/1. Обычно это делается, если к этому порту подключен другой коммутатор. Root guard лучше всего развертывать на портах, которые подключаются к коммутаторам, которые не должны быть корневым мостом. В лабораторной топологии S1 F0/1 был бы наиболее логичным кандидатом на root guard. Однако S2 G0/1 показан здесь в качестве примера, поскольку гигабитные порты чаще используются для межпереключательных соединений.       
+S2(config)# interface g0/1  
+S2(config-if)# spanning-tree guard root  
+b. Выполните команду show run | begin Gig, чтобы убедиться, что защита root настроена.  
+S2# show run | begin Gig  
+interface GigabitEthernet0/1  
+spanning-tree guard root  
+### Примечание: Порт S2 Gi0/1 в данный момент не подключен, поэтому он не участвует в STP. В противном случае вы могли бы использовать команду show spanning-tree interface Gi0/1 detail.  
+### Примечание: Выражение в команде show run | begin чувствительно к регистру  
+c. Если порт, который включен с помощью BPDU guard, получает более высокий BPDU, он переходит в состояние, несовместимое с root. Используйте команду показать несогласованные порты связующего дерева, чтобы определить, есть ли какие-либо порты, которые в настоящее время получают более высокие BPDU, которых не должно быть.  
+S2# show spanning-tree inconsistentports  
 
+Name                 Interface              Inconsistency   
+-------------------- ---------------------- ------------------  
+Number of inconsistent ports (segments) in the system : 0  
+### Примечание: Root guard позволяет подключенному коммутатору участвовать в STP до тех пор, пока устройство не попытается стать root. Если root guard блокирует порт, последующее восстановление происходит автоматически. Порт возвращается в состояние пересылки, если вышестоящие BPDU останавливаются.  
+Шаг 4: Включите loop guard.
+Функция STP loop guard обеспечивает дополнительную защиту от циклов пересылки уровня 2 (STP loops). Цикл STP создается, когда порт, блокирующий STP, в избыточной топологии ошибочно переходит в состояние пересылки. Обычно это происходит потому, что один из портов физически избыточной топологии (не обязательно порт, блокирующий STP) больше не принимает STP BPDU. Наличие всех портов в состоянии пересылки приведет к циклам пересылки. Если порт, включенный с помощью loop guard, перестает прослушивать BPDU с назначенного порта в сегменте, он переходит в состояние несогласованности цикла вместо перехода в состояние пересылки. Несогласованность цикла в основном блокирует, и трафик не пересылается. Когда порт снова обнаруживает BPDU, он автоматически восстанавливается, возвращаясь в состояние блокировки.    
+a. Защита петли должна быть применена к не обозначенным портам. Таким образом, глобальная команда может быть настроена на некорневых коммутаторах.  
+S2(config)# spanning-tree loopguard default    
+b. Проверьте конфигурацию loopguard.    
+S2# show spanning-tree summary  
+Switch is in pvst mode  
+
+Extended system ID           is enabled   
+Portfast Default             is disabled  
+PortFast BPDU Guard Default  is disabled  
+Portfast BPDU Filter Default is disabled  
+Loopguard Default            is enabled  
+EtherChannel misconfig guard is enabled  
+UplinkFast                   is disabled  
+BackboneFast                 is disabled  
+Configured Pathcost method used is short  
+
+Name                   Blocking Listening Learning Forwarding STP Active  
+---------------------- -------- --------- -------- ---------- ----------  
+VLAN0001                     0         0        0          3          3   
+---------------------- -------- --------- -------- ---------- ---------  
+
+## Часть 4: Настройка безопасности портов и отключение неиспользуемых портов
+Коммутаторы могут быть подвержены переполнению CAM-таблицы, также известной как таблица MAC-адресов, атакам подмены MAC и несанкционированным подключениям к портам коммутатора. В этой задаче вы настроите безопасность порта, чтобы ограничить количество MAC-адресов, которые могут быть изучены на порту коммутатора, и отключить порт, если это число будет превышено.  
+### Шаг 1: Запишите MAC-адрес R1 G0/0/1.  
+Из командной строки R1 используйте команду show interface и запишите MAC-адрес интерфейса.  
+R1# show interfaces g0/0/1  
+GigabitEthernet0/1 is up, line protocol is up   
+  Hardware is CN Gigabit Ethernet, address is fc99.4775.c3e1 (bia fc99.4775.c3e1)  
+  Internet address is 192.168.1.1/24  
+  MTU 1500 bytes, BW 100000 Kbit/sec, DLY 100 usec,   
+     reliability 255/255, txload 1/255, rxload 1/255  
+  Encapsulation ARPA, loopback not set   
+  Keepalive set (10 sec)  
+  Full Duplex, 100Mbps, media type is RJ45   
+<Output Omitted>  
+### Каков MAC-адрес интерфейса R1 G0/0/1?   
+
+### Шаг 2: Настройте базовую безопасность портов.
+Эта процедура должна выполняться на всех используемых портах доступа. Порт S1 F0/5 показан здесь в качестве примера.  
+a. Из командной строки S1 войдите в режим настройки интерфейса для порта, который подключается к маршрутизатору (FastEthernet0/5).  
+S1(config)# interface f0/5  
+b. Выключите порт коммутатора.  
+S1(config-if)# shutdown  
+c. Включите режим защитного порта.  
+S1(config-if)# switchport port-security  
+Примечание: Порт коммутатора должен быть настроен как порт доступа, чтобы включить защиту порта.  
+Примечание: Ввод только команды switchport port-security устанавливает максимальные MAC-адреса равными 1, а действие нарушения - завершению работы. Команды switchport port-security maximum и switchport port-security violation можно использовать для изменения поведения по умолчанию.   
+d. Настройте статическую запись для MAC-адреса интерфейса R1 G0/0/1, записанного на шаге 1.  
+S1(config-if)# switchport port-security mac-address xxxx.xxxx.xxxx   
+Примечание: xxxx.xxxx.xxxx - это фактический MAC-адрес интерфейса маршрутизатора G0/0/1.  
+Примечание: Вы также можете использовать команду switchport port-security mac-address sticky для добавления всех защищенных MAC-адресов, которые динамически запоминаются на порту (до максимального значения), в конфигурацию коммутатора.  
+e. Включите порт коммутатора.  
+S1(config-if)# no shutdown  
+### Шаг 3: Проверьте безопасность порта на S1 F0/5.  
+a. На S1 выполните команду show port-security, чтобы убедиться, что безопасность порта настроена на S1 F0/5.  
+S1# show port-security interface f0/5  
+Port Security              : Enabled  
+Port Status                : Secure-up  
+Violation Mode             : Shutdown  
+Aging Time                 : 0 mins  
+Aging Type                 : Absolute  
+SecureStatic Address Aging : Disabled  
+Maximum MAC Addresses      : 1  
+Total MAC Addresses        : 1  
+Configured MAC Addresses   : 1  
+Sticky MAC Addresses       : 0  
+Last Source Address:Vlan   : 0000.0000.0000:0  
+Security Violation Count   : 0  
+
+Каково количество нарушений безопасности?  
+Введите свои ответы здесь.  
+
+Каков статус порта F0/5?  
+Введите свои ответы здесь.  
+
+Каков последний адрес источника и VLAN?  
+  
+b. С помощью интерфейса командной строки R1 выполните ping PC-A для проверки подключения. Это также гарантирует, что коммутатор узнает MAC-адрес R1 G0/0/1.  
+R1# ping 192.168.1.10  
+c. Теперь нарушите безопасность, изменив MAC-адрес в интерфейсе маршрутизатора. Войдите в режим настройки интерфейса для Fast Ethernet 0/1. Настройте MAC-адрес для интерфейса на интерфейсе, используя aaaa.bbbb.cccc в качестве адреса.  
+R1(config)# interface g0/0/1  
+R1(config-if)# mac-address aaaa.bbbb.cccc  
+R1(config-if)# end  
+### Примечание: Вы также можете изменить MAC-адрес ПК, прикрепленный к S1 F0/6, и добиться результатов, аналогичных показанным здесь.  
+Из командной строки R1 выполните поиск PC-A. Был ли пинг успешным? Объяснять.  
+d. На консоли S1 следите за сообщениями, когда порт F0/5 обнаруживает нарушающий MAC-адрес.  
+
+*Jan 14 01:34:39.750: %PM-4-ERR_DISABLE: psecure-violation error detected on Fa0/5, putting Fa0/5 in err-disable state  
+*Jan 14 01:34:39.750: %PORT_SECURITY-2-PSECURE_VIOLATION: Security violation occurred, caused by MAC address aaaa.bbbb.cccc on port FastEthernet0/5.  
+*Jan 14 01:34:40.756: %LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/5, changed state to down  
+*Jan 14 01:34:41.755: %LINK-3-UPDOWN: Interface FastEthernet0/5, changed state to down  
+e. На коммутаторе используйте команды show port-security, чтобы убедиться, что безопасность порта была нарушена.   
+
+S1# show port-security  
+Secure Port MaxSecureAddr CurrentAddr SecurityViolation Security Action  
+               (Count)       (Count)        (Count)  
+--------------------------------------------------------------------  
+      Fa0/5            1           1                 1         Shutdown  
+----------------------------------------------------------------------  
+Total Addresses in System (excluding one mac per port)     : 0  
+Max Addresses limit in System (excluding one mac per port) : 8192  
+  
+S1# show port-security interface f0/5  
+Port Security              : Enabled  
+Port Status                : Secure-shutdown  
+Violation Mode             : Shutdown  
+Aging Time                 : 0 mins  
+Aging Type                 : Absolute  
+SecureStatic Address Aging : Disabled  
+Maximum MAC Addresses      : 1  
+Total MAC Addresses        : 1  
+Configured MAC Addresses   : 1  
+Sticky MAC Addresses       : 0  
+Last Source Address:Vlan   : aaaa.bbbb.cccc:1  
+Security Violation Count   : 1  
+
+S1# show port-security address  
+Secure Mac Address Table  
+-----------------------------------------------------------------------------  
+Vlan    Mac Address       Type                          Ports   Remaining Age  
+                                                                   (mins)  
+----    -----------       ----                          -----   -------------  
+   1    fc99.4775.c3e1    SecureConfigured              Fa0/5        -  
+----------------------------------------------------------------------------- 
+Total Addresses in System (excluding one mac per port)     : 0  
+Max Addresses limit in System (excluding one mac per port) : 8192  
+f. Удалите жестко закодированный MAC-адрес с маршрутизатора и повторно включите интерфейс G0/0/1.  
+R1(config)# interface g0/0/1  
+R1(config-if)# no mac-address aaaa.bbbb.cccc  
+Примечание: Это восстановит исходный MAC-адрес интерфейса Gigabit Ethernet.  
+Из R1 попробуйте снова выполнить пинг PC-A по адресу 192.168.1.10. Был ли пинг успешным? Объяснять.  
+### Шаг 4: Снимите статус отключения ошибки S1 F0/5.  
+a. В консоли S1 устраните ошибку и повторно включите порт, используя команды, показанные в примере. Это изменит статус порта с безопасного завершения работы на Безопасное включение.  
+S1(config)# interface f0/5  
+S1(config-if)# shutdown  
+S1(config-if)# no shutdown  
+### Примечание: При этом предполагается, что устройство/интерфейс с нарушающим MAC-адресом был удален и заменен исходной конфигурацией устройства/интерфейса.  
+b. Из R1 снова выполните поиск PC-A. На этот раз вы должны добиться успеха.  
+R1# ping 192.168.1.10   
+### Шаг 5: Удалите базовую защиту порта на S1 F0/5.  
+С консоли S1 снимите защиту порта на F0/5. Эта процедура также может быть использована для повторного включения порта, но команды port security  должны быть перенастроены.  
+S1(config)# interface f0/5  
+S1(config-if)# no switchport port-security  
+S1(config-if)# no switchport port-security mac-address fc99.4775.c3e1  
+Вы также можете использовать следующие команды для возврата интерфейса к настройкам по умолчанию:  
+S1(config)# default interface f0/5  
+S1(config)# interface f0/5  
+Примечание: Эта команда default interface также требует, чтобы вы перенастроили порт в качестве порта доступа, чтобы повторно включить команды безопасности.    
+### Шаг 6: (Необязательно) Настройте безопасность портов для VoIP.  
+ В этом примере показана типичная конфигурация безопасности порта для голосового порта. Разрешены три MAC-адреса, которые должны быть изучены динамически. Один MAC-адрес предназначен для IP-телефона, один - для коммутатора и один - для ПК, подключенного к IP-телефону. Нарушения этой политики приводят к закрытию порта. Время ожидания устаревания для изученных MAC-адресов установлено равным двум часам.    
+В следующем примере отображается порт S2 F0/18:  
+S2(config)# interface f0/18  
+S2(config-if)# switchport mode access  
+S2(config-if)# switchport port-security  
+S2(config-if)# switchport port-security maximum 3  
+S2(config-if)# switchport port-security violation shutdown  
+S2(config-if)# switchport port-security aging time 120  
+### Шаг 7: Отключите неиспользуемые порты на S1 и S2.  
+В качестве дополнительной меры безопасности отключите порты, которые не используются на коммутаторе.  
+a. Порты F0/1, F0/5 и F0/6 используются на S1. Остальные порты Fast Ethernet и два порта Gigabit Ethernet будут отключены.  
+S1(config)# interface range f0/2 - 4  
+S1(config-if-range)# shutdown  
+S1(config-if-range)# interface range f0/7 - 24  
+S1(config-if-range)# shutdown  
+S1(config-if-range)# interface range g0/1 - 2  
+S1(config-if-range)# shutdown  
+b. Порты F0/1 и F0/18 используются на S2. Остальные порты Fast Ethernet и порты Gigabit Ethernet будут отключены. 
+S2(config)# interface range f0/2 – 17, f0/19 – 24, g0/1 - 2  
+S2(config-if-range)# shutdown  
+### Шаг 8: Переместите активные порты в VLAN, отличную от VLAN 1 по умолчанию.  
+В качестве дополнительной меры безопасности вы можете переместить все активные порты конечного пользователя и порты маршрутизатора в VLAN, отличную от VLAN 1 по умолчанию на обоих коммутаторах.  
+a. Настройте новую VLAN для пользователей на каждом коммутаторе, используя следующие команды:  
+S1(config)# vlan 20   
+S1(config-vlan)# name Users  
+
+S2(config)# vlan 20  
+S2(config-vlan)# name Users  
+b. Добавьте текущие активные порты доступа (не магистральные) в новую VLAN.  
+S1(config)# interface f0/6  
+S1(config-if-range)# switchport access vlan 20  
+
+S2(config)# interface f0/18  
+S2(config-if)# switchport access vlan 20  
+### Примечание: Это предотвратит связь между хостами конечных пользователей и IP-адресом VLAN управления коммутатора, который в настоящее время является VLAN 1. Доступ к коммутатору по-прежнему можно получить и настроить с помощью консольного подключения.
+Примечание: Чтобы обеспечить SSH-доступ к коммутатору, определенный порт может быть назначен в качестве порта управления и добавлен в VLAN 1 с подключенной конкретной рабочей станцией управления. Более сложным решением является создание новой VLAN для управления коммутаторами (или использование существующей собственной магистральной VLAN 99) и настройка отдельной подсети для управляющих и пользовательских VLAN. 
+### Шаг 9: Настройте порт с помощью функции PVLAN Edge.
+Некоторые приложения требуют, чтобы трафик не пересылался на уровне 2 между портами на одном и том же коммутаторе, чтобы один сосед не видел трафик, генерируемый другим соседом. В такой среде использование пограничной функции частной VLAN (PVLAN), также известной как защищенные порты, гарантирует отсутствие обмена одноадресным, широковещательным или многоадресным трафиком между этими портами коммутатора. Пограничная функция PVLAN может быть реализована только для портов на одном коммутаторе и является локально значимой.  
+Например, чтобы предотвратить трафик между хостом PC-A на S1 (порт F0/6) и хостом на другом порту S1 (например, порт F0/7, который ранее был отключен), вы можете использовать команду switchport protected для активации пограничной функции PVLAN на этих двух портах. Используйте команду настройки защищенного интерфейса no switchport, чтобы отключить защищенный порт.  
+a. Настройте функцию PVLAN Edge в режиме настройки интерфейса, используя следующие команды:  
+S1(config)# interface f0/6    
+S1(config-if)# switchport protected    
+S1(config-if)# interface f0/7    
+S1(config-if)# switchport protected    
+S1(config-if)# no shut    
+S1(config-if)# end    
+b. Убедитесь, что пограничная функция PVLAN (protected port) включена на F0/6.    
+S1# show interfaces f0/6 switchport  
+Name: Fa0/6  
+Switchport: Enabled  
+Administrative Mode: dynamic auto  
+Operational Mode: static access  
+Administrative Trunking Encapsulation: dot1q  
+Negotiation of Trunking: On  
+Access Mode VLAN: 20 (Users)  
+Trunking Native Mode VLAN: 1 (default)  
+Administrative Native VLAN tagging: enabled  
+Voice VLAN: none  
+Administrative private-vlan host-association: none  
+Administrative private-vlan mapping: none  
+Administrative private-vlan trunk native VLAN: none  
+Administrative private-vlan trunk Native VLAN tagging: enabled  
+Administrative private-vlan trunk encapsulation: dot1q  
+Administrative private-vlan trunk normal VLANs: none  
+Administrative private-vlan trunk private VLANs: none  
+Operational private-vlan: none  
+Trunking VLANs Enabled: ALL  
+Pruning VLANs Enabled: 2-1001  
+Capture Mode Disabled  
+Capture VLANs Allowed: ALL   
+Protected: true   
+Unknown unicast blocked: disabled  
+Unknown multicast blocked: disabled  
+Appliance trust: none  
+c. Деактивируйте защищенный порт на интерфейсах F0/6 и F0/7, используя следующие команды:  
+S1(config)# interface range f0/6 - 7  
+S1(config-if-range)# no switchport protected  
+
+
+
+
+  
+  
+
+
+
+  
        
        
        
