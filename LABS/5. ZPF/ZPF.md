@@ -425,16 +425,18 @@ host (192.168.33.1) not reachable
 
 ### Дополнительно.  
 Создайте соответствующую пару зон, карты классов и карты политик и настройте R3, чтобы предотвратить попадание исходящего из Интернета трафика в Собственную зону.  
-R3(config)#class-map type inspect match-any INTERNET_PROTOCOLS  - Создаем карту классов протоколов исходящего трафика из интернета  
-R3(config-cmap)#match protocol tcp  
-R3(config-cmap)#match protocol udp  
-R3(config-cmap)#match protocol icmp  
-R3(config-cmap)#EXIT  
-R3(config)#policy-map type inspect INTERNET_TO_INSIDE   создаем карту политик  
-R3(config-pmap)#class type inspect INTERNET_PROTOCOLS  
-R3(config-pmap-c)#inspect  
+
+R3(config)#class-map type inspect match-any INTERNET_PROTOCOLS объявляем класс протоколов входящего траффика из интернета (протоколы не назначаем)
+R3(config-cmap)#exit
+R3(config)#policy-map type inspect INTERNET_TO_INSIDE  - карта политики для протоколов входящего траффика из интернета
+R3(config-pmap)#class type inspect INTERNET_PROTOCOLS
+R3(config-pmap-c)#inspect
 R3(config-pmap-c)#exit
-R3(config-pmap)#exit  
+R3(config-pmap)#class class-default    - весь траффик кроме класса протоколов входящего траффика из интернета отбрасываем
+R3(config-pmap-c)#drop
+R3(config-pmap-c)#exit
+R3(config-pmap)#exit
+
 R3(config)#$ecurity INTERNET_TO_INSIDE source INTERNET destination INSIDE  создаем пару зон  
 R3(config-sec-zone-pair)#service-policy type inspect INTERNET_TO_INSIDE  
 R3(config-sec-zone-pair)#EXIT  
@@ -449,7 +451,21 @@ Zone-pair name CONFROOM_TO_INTERNET
 Zone-pair name INTERNET_TO_INSIDE  
     Source-Zone INTERNET  Destination-Zone INSIDE  
     service-policy INTERNET_TO_INSIDE  
+Проверяем по пинг
 
+R3#ping 192.168.3.3
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.3.3, timeout is 2 seconds:
+.....
+Success rate is 0 percent (0/5)
+R3#
+
+R2#ping 192.168.3.3
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.3.3, timeout is 2 seconds:
+.....
+Success rate is 0 percent (0/5)
+R2#
 
 ### Приложение.  
 – Несколько интерфейсов в Одной Зоне   
