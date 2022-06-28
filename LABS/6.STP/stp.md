@@ -74,8 +74,202 @@ b. Отправьте Ping-запрос от PC-A к PC-B.
 ### Шаг 5: Сохраните основные конфигурации для маршрутизатора и обоих коммутаторов.  
 Сохраните текущую конфигурацию в конфигурации запуска из приглашения привилегированного режима EXEC.  
 S1# copy running-config startup-config  
+## Часть 2. Настройка Защищенных Магистральных портов  
+В этой части вы настроите магистральные порты, измените собственную VLAN для магистральных портов и проверите конфигурацию магистрали.  
+Защита магистральных портов может помочь предотвратить атаки с перескакиванием VLAN. Лучший способ предотвратить базовую атаку с перескакиванием VLAN - это явно отключить транкинг на всех портах, кроме портов, которые специально требуют транкинга. На требуемых портах транкинга отключите переговоры DTP (auto trunking) и включите транкинг вручную. Если транкинг для интерфейса не требуется, настройте порт в качестве порта доступа. Это отключает транкинг в интерфейсе.  
+Примечание: Задачи должны выполняться на S1 или S2, как указано.  
+### Шаг 1: Настройте S1 в качестве корневого коммутатора.  
+Для целей этой вкладки S2 в настоящее время является корневым мостом. Вы настроите S1 в качестве корневого моста, изменив уровень приоритета идентификатора моста.  
+a. Из консоли на S1 войдите в режим глобальной конфигурации.    
+b. Приоритет по умолчанию для S1 и S2 равен 32769 (32768 + 1 с расширением системного идентификатора). Установите приоритет S1 равным 0, чтобы он стал корневым коммутатором.  
+S1(config)# spanning-tree vlan 1 priority 0
+S1(config)# exit
+### Примечание: Вы также можете использовать команду spanning-tree vlan 1 root primary, чтобы сделать S1 корневым коммутатором для VLAN 1.  
+c. Выполните команду show spanning-tree , чтобы убедиться, что S1 является корневым мостом, чтобы увидеть используемые порты и их статус.  
+S1# show spanning-tree  
 
+VLAN0001  
+  Spanning tree enabled protocol ieee  
+  Root ID    Priority    1  
+             Address     001d.4635.0c80   
+             This bridge is the root  
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec  
 
+  Bridge ID  Priority    1      (priority 0 sys-id-ext 1)  
+             Address     001d.4635.0c80  
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec  
+             Aging Time 300  
+
+Interface        Role Sts Cost      Prio.Nbr Type  
+---------------- ---- --- --------- -------- --------------------------------  
+Fa0/1            Desg FWD 19        128.1    P2p  
+Fa0/5            Desg FWD 19        128.5    P2p   
+Fa0/6            Desg FWD 19        128.6    P2p  
+### Вопрос:  
+### Каков приоритет S1?  
+### Какие порты используются и каков их статус?   
+
+### Шаг 2: Настройте магистральные порты на S1 и S2.  
+a. Настройте порт F0/1 на S1 в качестве магистрального порта.   
+S1(config)# interface f0/1  
+S1(config-if)# switchport mode trunk  
+### Примечание: При выполнении этой лабораторной работы с коммутатором 3560 пользователь должен сначала ввести команду switchport trunk encapsulation dot1q.    
+b. Настройте порт F0/1 на S2 в качестве магистрального порта.  
+S2(config)# interface f0/1  
+S2(config-if)# switchport mode trunk  
+c. Убедитесь, что порт S1 F0/1 находится в режиме транкинга, с помощью команды show interfaces trunk.  
+S1# show interfaces trunk  
+
+Port        Mode         Encapsulation  Status        Native vlan  
+Fa0/1       on           802.1q         trunking      1  
+
+Port        Vlans allowed on trunk  
+Fa0/1       1-4094  
+
+Port        Vlans allowed and active in management domain  
+Fa0/1       1  
+
+Port        Vlans in spanning tree forwarding state and not pruned  
+Fa0/1       1  
+
+### Шаг 3: Измените собственную VLAN для магистральных портов на S1 и S2.  
+a. Изменение собственной VLAN для магистральных портов на неиспользуемую VLAN помогает предотвратить атаки с перескакиванием VLAN.    
+Вопрос:  
+Из выходных данных команды show interfaces trunk на предыдущем шаге, какова текущая собственная VLAN для интерфейса магистрали S1 F0/1?    
+b. Установите для собственной VLAN на магистральном интерфейсе S1 F0/1 значение неиспользуемой VLAN 99.  
+S1(config)# interface f0/1  
+S1(config-if)# switchport trunk native vlan 99  
+S1(config-if)# end  
+c. Через короткий промежуток времени должно появиться следующее сообщение:  
+02:16:28: %CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/1 (99), with S2 FastEthernet0/1 (1).  
+Что означает это сообщение?  
+d. Установите для собственной VLAN на магистральном интерфейсе S2 F0/1 значение VLAN 99.  
+S2(config)# interface f0/1  
+S2(config-if)# switchport trunk native vlan 99  
+S2(config-if)# end  
+### Шаг 4: Предотвратите использование DTP на S1 и S2.
+Установка для магистрального порта значения nonegotiate также помогает уменьшить переключение VLAN, отключив генерацию кадров DTP.
+S1(config)# interface f0/1   
+S1(config-if)# switchport nonegotiate  
+
+S2(config)# interface f0/1  
+S2(config-if)# switchport nonegotiate  
+Шаг 5: Проверьте конфигурацию транкинга на порту F0/1.  
+S1# show interfaces f0/1 trunk  
+
+Port        Mode         Encapsulation  Status        Native vlan  
+Fa0/1       on           802.1q         trunking      99  
+  
+Port        Vlans allowed on trunk  
+Fa0/1       1-4094  
+
+Port        Vlans allowed and active in management domain  
+Fa0/1       1  
+  
+Port        Vlans in spanning tree forwarding state and not pruned  
+Fa0/1       1  
+
+S1# show interfaces f0/1 switchport  
+
+Name: Fa0/1  
+Switchport: Enabled  
+Administrative Mode: trunk  
+Operational Mode: trunk  
+Administrative Trunking Encapsulation: dot1q  
+Operational Trunking Encapsulation: dot1q  
+Negotiation of Trunking: Off  
+Access Mode VLAN: 1 (default)  
+Trunking Native Mode VLAN: 99 (Inactive)  
+Administrative Native VLAN tagging: enabled  
+Voice VLAN: none  
+Administrative private-vlan host-association: none  
+Administrative private-vlan mapping: none  
+Administrative private-vlan trunk native VLAN: none  
+Administrative private-vlan trunk Native VLAN tagging: enabled 
+Administrative private-vlan trunk encapsulation: dot1q 
+Administrative private-vlan trunk normal VLANs: none  
+Administrative private-vlan trunk private VLANs: none 
+Operational private-vlan: none 
+Trunking VLANs Enabled: ALL    
+Pruning VLANs Enabled: 2-1001   
+Capture Mode Disabled   
+Capture VLANs Allowed: ALL  
+
+Protected: false  
+Unknown unicast blocked: disabled  
+Unknown multicast blocked: disabled  
+Appliance trust: none  
+
+### Шаг 6: Проверьте конфигурацию с помощью команды show run.  
+Используйте команду show run для отображения текущей конфигурации, начиная с первой строки, содержащей текстовую строку “0/1”.  
+
+S1# show run | begin 0/1  
+interface FastEthernet0/1  
+ switchport trunk native vlan 99  
+ switchport mode trunk  
+ switchport nonegotiate  
+  
+<output omitted>  
+### Шаг 7: Отключите транкинг на портах доступа S1.  
+a. На S1 настройте F0/5, порт, к которому подключен R1, только в режиме доступа.  
+S1(config)# interface f0/5  
+S1(config-if)# switchport mode access  
+b. На S1 настройте F0/6, порт, к которому подключен PCA, только в режиме доступа.    
+S1(config)# interface f0/6  
+S1(config-if)# switchport mode access  
+### Шаг 8: Отключите транкинг на портах доступа S2.
+На S2 настройте F0/18, порт, к которому подключена PCB, только в режиме доступа.  
+S2(config)# interface f0/18  
+S2(config-if)# switchport mode access  
+## Часть 3: Защита От STP-Атак
+Сетевые злоумышленники надеются подделать свою систему или мошеннический коммутатор, который они добавляют в сеть, в качестве корневого моста в топологии, манипулируя параметрами корневого моста STP. Если порт, настроенный с помощью PortFast, получает BPDU, STP может перевести порт в состояние блокировки с помощью функции, называемой BPDU guard.  
+Топология имеет только два коммутатора и не имеет избыточных путей, но STP все еще активен. В этой части вы включите функции безопасности коммутаторов, которые могут помочь уменьшить вероятность того, что злоумышленник манипулирует коммутаторами с помощью методов, связанных с STP.   
+### Шаг 1: Включите portfast.  
+PortFast настраивается на портах доступа, которые подключаются к одной рабочей станции или серверу, что позволяет им быстрее становиться активными         
+a. Включите PortFast на порту доступа S1 F0/5.  
+S1(config)# interface f0/5
+S1(config-if)# spanning-tree portfast
+
+%Warning: portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc... to this interface when portfast is enabled, can cause temporary bridging loops. Use with CAUTION   
+
+%Portfast has been configured on FastEthernet0/5 but will only  
+ have effect when the interface is in a non-trunking mode.  
+b. Включите PortFast на порту доступа S1 F0/6.  
+S1(config)# interface f0/6  
+S1(config-if)# spanning-tree portfast  
+c. Включите PortFast на портах доступа S2 F0/18.  
+S2(config)# interface f0/18  
+S2(config-if)# spanning-tree portfast  
+### Шаг 2: Включите защиту BPDU.  
+BPDU guard - это функция, которая может помочь предотвратить несанкционированные коммутаторы и подмену портов доступа.  
+a. Включите защиту BPDU на порту коммутатора F0/6.         
+S1(config)# interface f0/6
+S1(config-if)# spanning-tree bpduguard enable
+S2(config)# interface f0/18
+S2(config-if)# spanning-tree bpduguard enable
+Примечание: PortFast и BPDU guard также можно включить глобально с помощью команд spanning-tree portfast default и spanning-tree portfast bpduguard в режиме глобальной конфигурации. 
+Примечание: Защита BPDU может быть включена на всех портах доступа, для которых включена функция PortFast. Эти порты никогда не должны получать BPDU. BPDU guard лучше всего развертывать на портах, ориентированных на пользователя, чтобы предотвратить несанкционированное расширение сети коммутатора злоумышленником. Если порт включен с помощью BPDU guard и получает BPDU, он отключен и должен быть повторно включен вручную. На порту можно настроить тайм-аут, допускающий ошибку, чтобы он мог автоматически восстанавливаться по истечении указанного периода времени.   
+b. Убедитесь, что защита BPDU настроена с помощью команды show spanning-tree interface f0/6 detail на S1.      
+S1# show spanning-tree interface f0/6 detail  
+    Port 6 (FastEthernet0/6) of VLAN0001 is designated forwarding  
+   Port path cost 19, Port priority 128, Port Identifier 128.6.  
+   Designated root has priority 1, address 001d.4635.0c80  
+   Designated bridge has priority 1, address 001d.4635.0c80  
+   Designated port id is 128.6, designated path cost 0  
+   Timers: message age 0, forward delay 0, hold 0  
+   Number of transitions to forwarding state: 1  
+   The port is in the portfast mode  
+   Link type is point-to-point by default  
+   Bpdu guard is enabled  
+   BPDU: sent 3349, received 0  
+
+### Шаг 3: Включите root guard.
+Root guard - это еще один вариант предотвращения несанкционированных переключений и подмены. Защита Root может быть включена на всех портах коммутатора, которые не являются корневыми портами. Обычно он включен только на портах, подключаемых к пограничным коммутаторам, где никогда не должен приниматься улучшенный BPDU. Каждый коммутатор должен иметь только один корневой порт, который является наилучшим путем к корневому коммутатору.
+a. Следующая команда настраивает root guard на интерфейсе S2 G0/1. Обычно это делается, если к этому порту подключен другой коммутатор. Root guard лучше всего развертывать на портах, которые подключаются к коммутаторам, которые не должны быть корневым мостом. В лабораторной топологии S1 F0/1 был бы наиболее логичным кандидатом на root guard. Однако S2 G0/1 показан здесь в качестве примера, поскольку гигабитные порты чаще используются для межпереключательных соединений.       
+
+       
+       
+       
 ### Шаг 1: Подключите кабель к сети.    
 Подсоедините устройства, как показано на схеме топологии, и при необходимости подключите кабель.    
 ### Шаг 2: Настройте основные параметры для каждого маршрутизатора.    
