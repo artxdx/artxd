@@ -14,30 +14,30 @@
  Проверьте конфигурацию магистрали(trunk).    
  Отключите транкинг.    
 ## Часть 3: Защита От STP-Атак    
- Включите PortFast и BPDU guard.
-S1(config)#spanning-tree portfast edge bpduguard
-S1(config)#spanning-tree portfast edge default
- Проверьте защиту BPDU guard.    
+ Включите PortFast и BPDU guard.  
+S1(config)#spanning-tree portfast edge bpduguard  
+S1(config)#spanning-tree portfast edge default  
+ Проверьте защиту BPDU guard.     
  Включите root guard.    
-Функцию защиты корня необходимо включить на всех портах, которые не должны стать корневыми.  
-S1(config)#interface Ethernet0/0  
-S1(config)#spanning-tree guard root  
-*Jun 29 00:01:43.115: %SPANTREE-2-ROOTGUARD_CONFIG_CHANGE: Root guard enabled on port Ethernet0/0.
-S1(config)#interface Ethernet0/2
-S1(config-if)#spanning-tree guard root
-S1(config-if)#
-*Jun 29 00:05:50.061: %SPANTREE-2-ROOTGUARD_CONFIG_CHANGE: Root guard enabled on port Ethernet0/2.
-S1(config-if)#exit
-S1(config)#interface Ethernet0/3
-S1(config-if)#spanning-tree guard root
-S1(config-if)#
-*Jun 29 00:06:28.900: %SPANTREE-2-ROOTGUARD_CONFIG_CHANGE: Root guard enabled on port Ethernet0/3.
-S1(config-if)#exit
+Функцию защиты корня необходимо включить на всех портах, которые не должны стать корневыми.    
+S1(config)#interface Ethernet0/0    
+S1(config)#spanning-tree guard root    
+*Jun 29 00:01:43.115: %SPANTREE-2-ROOTGUARD_CONFIG_CHANGE: Root guard enabled on port Ethernet0/0.  
+S1(config)#interface Ethernet0/2  
+S1(config-if)#spanning-tree guard root  
+S1(config-if)#  
+*Jun 29 00:05:50.061: %SPANTREE-2-ROOTGUARD_CONFIG_CHANGE: Root guard enabled on port Ethernet0/2.   
+S1(config-if)#exit  
+S1(config)#interface Ethernet0/3  
+S1(config-if)#spanning-tree guard root  
+S1(config-if)#  
+*Jun 29 00:06:28.900: %SPANTREE-2-ROOTGUARD_CONFIG_CHANGE: Root guard enabled on port Ethernet0/3.  
+S1(config-if)#exit  
 
- Включить loop guard.
-S1(config)#spanning-tree loopguard default
-## Часть 4: Настройка безопасности портов и отключение неиспользуемых портов    
- Настройте и проверьте безопасность портов.    
+ Включить loop guard.  
+S1(config)#spanning-tree loopguard default  
+## Часть 4: Настройка безопасности портов и отключение неиспользуемых портов      
+ Настройте и проверьте безопасность портов.     
  Отключите неиспользуемые порты.    
  Переместите порты из VLAN 1 по умолчанию в альтернативную VLAN.   
  Настройте пограничную функцию PVLAN на порту.      
@@ -56,7 +56,7 @@ S1(config)#spanning-tree loopguard default
 # Выполнение лабораторной работы № 6  
 Для выполнения данной лабораторной работы 
 Данная топология была собрана на лабораторном(программном) стенде EVE-NG.В дальнейшем настройка сетевых устройств будет осуществляться согласно схемы собранной на стенде.   
-![](eve.jpg)
+![](topology61.jpg)
 ## Часть 1: Настройка Основных параметров Коммутатора
 В части 1 вы настроите топологию сети и настроите основные параметры, такие как имена хостов, IP-адреса и пароли доступа к устройствам.
 ### Шаг 1: Подключите сеть, как показано в топологии.
