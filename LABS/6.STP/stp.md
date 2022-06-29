@@ -336,54 +336,26 @@ S2(config-if)#exit
 Топология имеет только два коммутатора и не имеет избыточных путей, но STP все еще активен. В этой части вы включите функции безопасности коммутаторов, которые могут помочь уменьшить вероятность того, что злоумышленник манипулирует коммутаторами с помощью методов, связанных с STP.   
 ### Шаг 1: Включите portfast.  
 PortFast настраивается на портах доступа, которые подключаются к одной рабочей станции или серверу, что позволяет им быстрее становиться активными         
-a. Включите PortFast на порту доступа S1 e0/0.  
-S1(config)#interface Ethernet0/0  
+
+a. Включите PortFast на портах доступа коммутаторов S1,S2.  
+
+S1(config)#interface range Ethernet0/2  - Подключен PC-A
 S1(config-if)#spanning-tree portfast
-%Warning: portfast should only be enabled on ports connected to a single
- host. Connecting hubs, concentrators, switches, bridges, etc... to this
- interface  when portfast is enabled, can cause temporary bridging loops.
- Use with CAUTION
-
-%Portfast has been configured on Ethernet0/0 but will only
- have effect when the interface is in a non-trunking mode.
-
-b. Включите PortFast на порту доступа S1 e0/2.  
-S1(config)#interface Ethernet0/2
-S1(config-if)#spanning-tree portfast
-%Warning: portfast should only be enabled on ports connected to a single
- host. Connecting hubs, concentrators, switches, bridges, etc... to this
- interface  when portfast is enabled, can cause temporary bridging loops.
- Use with CAUTION
-
-%Portfast has been configured on Ethernet0/2 but will only
- have effect when the interface is in a non-trunking mode.
 S1(config-if)#exit
-
-c. Включите PortFast на портах доступа S2 e0/1.  
-S2(config)#interface Ethernet0/1
- S2(config-if)#spanning-tree portfast
-
-%Warning: portfast should only be enabled on ports connected to a single
- host. Connecting hubs, concentrators, switches, bridges, etc... to this
- interface  when portfast is enabled, can cause temporary bridging loops.
- Use with CAUTION
-
-%Portfast has been configured on Ethernet0/1 but will only
- have effect when the interface is in a non-trunking mode.
+S2(config)#interface range Ethernet0/1 - Подключен PC-B
+S2(config-if)#spanning-tree portfast
 
 ### Шаг 2: Включите защиту BPDU.  
 BPDU guard - это функция, которая может помочь предотвратить несанкционированные коммутаторы и подмену портов доступа.  
-a. Включите защиту BPDU на порту коммутатора e0/0.         
-S1(config)#interface Ethernet0/0
-S1(config-if)# spanning-tree bpduguard enable
-S1(config-if)#interface Ethernet0/2
+a. Включите защиту BPDU на портах коммутаторов S1,S2 (все кроме транковых)        
+S1(config-if)#interface range Ethernet0/2
 S1(config-if)#spanning-tree  bpduguard enable
-S2(config)#interface range Ethernet0/1-3
+S2(config)#interface range Ethernet0/1
 S2(config-if-range)#spanning-tree bpduguard enable
 S2(config-if-range)#exit
 Примечание: PortFast и BPDU guard также можно включить глобально с помощью команд spanning-tree portfast default и spanning-tree portfast bpduguard в режиме глобальной конфигурации. 
 Примечание: Защита BPDU может быть включена на всех портах доступа, для которых включена функция PortFast. Эти порты никогда не должны получать BPDU. BPDU guard лучше всего развертывать на портах, ориентированных на пользователя, чтобы предотвратить несанкционированное расширение сети коммутатора злоумышленником. Если порт включен с помощью BPDU guard и получает BPDU, он отключен и должен быть повторно включен вручную. На порту можно настроить тайм-аут, допускающий ошибку, чтобы он мог автоматически восстанавливаться по истечении указанного периода времени.   
-b. Убедитесь, что защита BPDU настроена с помощью команды show spanning-tree interface f0/6 detail на S1.      
+b. Убедитесь, что защита BPDU настроена с помощью команды show spanning-tree interface e0/2 detail на S1.      
 S1#show spanning-tree interface Ethernet0/2
 
 Vlan                Role Sts Cost      Prio.Nbr Type
@@ -404,11 +376,10 @@ S1#show spanning-tree interface Ethernet0/2 detail
    BPDU: sent 2422, received 0
 S1#
 
-
 ### Шаг 3: Включите root guard.
 Root guard - это еще один вариант предотвращения несанкционированных переключений и подмены. Защита Root может быть включена на всех портах коммутатора, которые не являются корневыми портами. Обычно он включен только на портах, подключаемых к пограничным коммутаторам, где никогда не должен приниматься улучшенный BPDU. Каждый коммутатор должен иметь только один корневой порт, который является наилучшим путем к корневому коммутатору.
-a. Следующая команда настраивает root guard на интерфейсе S2 e0/1. Обычно это делается, если к этому порту подключен другой коммутатор. Root guard лучше всего развертывать на портах, которые подключаются к коммутаторам, которые не должны быть корневым мостом. В лабораторной топологии S1  был бы наиболее логичным кандидатом на root guard.        
-S2(config)#interface range Ethernet0/1-3
+a. Следующая команда настраивает root guard на интерфейсе S2 e0/1. Обычно это делается, если к этому порту подключен другой коммутатор. Root guard лучше всего развертывать на портах, которые подключаются к коммутаторам, которые не должны быть корневым мостом. 
+S2(config)#interface Ethernet0/3
 S2(config-if-range)#spanning-tree guard root
 S2# show spanning-tree inconsistentports  
 
@@ -443,14 +414,13 @@ VLAN0005                     0         0        0          3          3
 Коммутаторы могут быть подвержены переполнению CAM-таблицы, также известной как таблица MAC-адресов, атакам подмены MAC и несанкционированным подключениям к портам коммутатора. В этой задаче вы настроите безопасность порта, чтобы ограничить количество MAC-адресов, которые могут быть изучены на порту коммутатора, и отключить порт, если это число будет превышено.  
 ### Шаг 1: Запишите MAC-адрес R1 G0/0/1.  
 Из командной строки R1 используйте команду show interface и запишите MAC-адрес интерфейса.  
-R1# show interfaces g0/0/1  
-GigabitEthernet0/1 is up, line protocol is up
+R1# show interface  
+GigabitEthernet0/1.5 is up, line protocol is up
   Hardware is iGbE, address is 5000.0006.0001 (bia 5000.0006.0001)
-  Internet address is 192.168.1.1/24
+  Internet address is 192.168.5.1/24
   MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec,
      reliability 255/255, txload 1/255, rxload 1/255
-  Encapsulation ARPA, loopback not set
-
+  Encapsulation 802.1Q Virtual LAN, Vlan ID  5.
 ### Каков MAC-адрес интерфейса R1 G0/0/1?   
 5000.0006.0001
 ### Шаг 2: Настройте базовую безопасность портов.
@@ -475,37 +445,40 @@ S1(config-if)#switchport port-security mac-address 5000.0006.0001
 
 e. Включите порт коммутатора.  
 S1(config-if)# no shutdown  
-### Шаг 3: Проверьте безопасность порта на S1 F0/5.  
+### Шаг 3: Проверьте безопасность порта на S1 e0/0.  
 a. На S1 выполните команду show port-security, чтобы убедиться, что безопасность порта настроена на S1 e0/0.  
 
 S1#show port-security
-
 Secure Port  MaxSecureAddr  CurrentAddr  SecurityViolation  Security Action
                 (Count)       (Count)          (Count)
 ---------------------------------------------------------------------------
-      Et0/0              1            1                  0         Shutdown
+      Et0/0              1            0                  0         Shutdown
 ---------------------------------------------------------------------------
 Total Addresses in System (excluding one mac per port)     : 0
 Max Addresses limit in System (excluding one mac per port) : 4096
 
-
-Каково количество нарушений безопасности?  
+### Каково количество нарушений безопасности?  
 Введите свои ответы здесь.  
-
-Каков статус порта e0/0?  
+количество нарушений безопасности - SecurityViolation=0
+### Каков статус порта e0/0?  
 Введите свои ответы здесь.  
-
+No shutdown
 Каков последний адрес источника и VLAN?  
-  
+не указан  
 b. С помощью интерфейса командной строки R1 выполните ping PC-A для проверки подключения. Это также гарантирует, что коммутатор узнает MAC-адрес R1 G0/0/1.  
-R1# ping 192.168.1.10  
+R1# ping 192.168.1.10 
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.5.10, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 2/2/3 ms
+R1#
 c. Теперь нарушите безопасность, изменив MAC-адрес в интерфейсе маршрутизатора. Войдите в режим настройки интерфейса для Fast Ethernet 0/1. Настройте MAC-адрес для интерфейса на интерфейсе, используя aaaa.bbbb.cccc в качестве адреса.  
-R1(config)# interface g0/0/1  
-R1(config-if)# mac-address aaaa.bbbb.cccc  
+R1(config)# interface g0/0/1   
+R1(config-if)# mac-address aaaa.bbbb.cccc  -данная операция не поддерживается маршрутизатором
 R1(config-if)# end  
-### Примечание: Вы также можете изменить MAC-адрес ПК, прикрепленный к S1 F0/6, и добиться результатов, аналогичных показанным здесь.  
+### Примечание: Вы также можете изменить MAC-адрес ПК, прикрепленный к S1 e0/2, и добиться результатов, аналогичных показанным здесь.  
 Из командной строки R1 выполните поиск PC-A. Был ли пинг успешным? Объяснять.  
-d. На консоли S1 следите за сообщениями, когда порт F0/5 обнаруживает нарушающий MAC-адрес.  
+d. На консоли S1 следите за сообщениями, когда порт e0/2 обнаруживает нарушающий MAC-адрес.  
 
 *Jan 14 01:34:39.750: %PM-4-ERR_DISABLE: psecure-violation error detected on Fa0/5, putting Fa0/5 in err-disable state  
 *Jan 14 01:34:39.750: %PORT_SECURITY-2-PSECURE_VIOLATION: Security violation occurred, caused by MAC address aaaa.bbbb.cccc on port FastEthernet0/5.  
