@@ -16,26 +16,10 @@
 ## Часть 3: Защита От STP-Атак    
  Включите PortFast и BPDU guard.  
 S1(config)#spanning-tree portfast edge bpduguard  
-S1(config)#spanning-tree portfast edge default  
  Проверьте защиту BPDU guard.     
  Включите root guard.    
-Функцию защиты корня необходимо включить на всех портах, которые не должны стать корневыми.    
-S1(config)#interface Ethernet0/0    
-S1(config)#spanning-tree guard root    
-*Jun 29 00:01:43.115: %SPANTREE-2-ROOTGUARD_CONFIG_CHANGE: Root guard enabled on port Ethernet0/0.  
-S1(config)#interface Ethernet0/2  
-S1(config-if)#spanning-tree guard root  
-S1(config-if)#  
-*Jun 29 00:05:50.061: %SPANTREE-2-ROOTGUARD_CONFIG_CHANGE: Root guard enabled on port Ethernet0/2.   
-S1(config-if)#exit  
-S1(config)#interface Ethernet0/3  
-S1(config-if)#spanning-tree guard root  
-S1(config-if)#  
-*Jun 29 00:06:28.900: %SPANTREE-2-ROOTGUARD_CONFIG_CHANGE: Root guard enabled on port Ethernet0/3.  
-S1(config-if)#exit  
-
  Включить loop guard.  
-S1(config)#spanning-tree loopguard default  
+
 ## Часть 4: Настройка безопасности портов и отключение неиспользуемых портов      
  Настройте и проверьте безопасность портов.     
  Отключите неиспользуемые порты.    
@@ -89,37 +73,38 @@ S1(config-line)# logging synchronous
 Настройте статический IP-адрес, маску подсети и шлюз по умолчанию для PCA и PCB, как показано в таблице адресации.  
 ### Шаг 4: Проверьте базовое сетевое подключение.     
 a. Отправьте Ping-запрос от PCA и PCB к интерфейсу R1 G0/0/1 по IP-адресу 192.168.1.1
-PC-A> ping 192.168.1.1
+PC-A> ping 192.168.5.1
 
-84 bytes from 192.168.1.1 icmp_seq=1 ttl=255 time=1.779 ms
-84 bytes from 192.168.1.1 icmp_seq=2 ttl=255 time=1.735 ms
-84 bytes from 192.168.1.1 icmp_seq=3 ttl=255 time=1.951 ms
-84 bytes from 192.168.1.1 icmp_seq=4 ttl=255 time=1.720 ms
-84 bytes from 192.168.1.1 icmp_seq=5 ttl=255 time=1.728 ms
+84 bytes from 192.168.5.1 icmp_seq=1 ttl=255 time=1.779 ms
+84 bytes from 192.168.5.1 icmp_seq=2 ttl=255 time=1.735 ms
+84 bytes from 192.168.5.1 icmp_seq=3 ttl=255 time=1.951 ms
+84 bytes from 192.168.5.1 icmp_seq=4 ttl=255 time=1.720 ms
+84 bytes from 192.168.5.1 icmp_seq=5 ttl=255 time=1.728 ms
 
 PC-A>
 
-PC-B> ping 192.168.1.1
+PC-B> ping 192.168.5.1
 
-84 bytes from 192.168.1.1 icmp_seq=1 ttl=255 time=2.866 ms
-84 bytes from 192.168.1.1 icmp_seq=2 ttl=255 time=2.145 ms
-84 bytes from 192.168.1.1 icmp_seq=3 ttl=255 time=2.082 ms
-84 bytes from 192.168.1.1 icmp_seq=4 ttl=255 time=2.119 ms
-84 bytes from 192.168.1.1 icmp_seq=5 ttl=255 time=2.247 ms
+84 bytes from 192.168.5.1 icmp_seq=1 ttl=255 time=2.866 ms
+84 bytes from 192.168.5.1 icmp_seq=2 ttl=255 time=2.145 ms
+84 bytes from 192.168.5.1 icmp_seq=3 ttl=255 time=2.082 ms
+84 bytes from 192.168.5.1 icmp_seq=4 ttl=255 time=2.119 ms
+84 bytes from 192.168.5.1 icmp_seq=5 ttl=255 time=2.247 ms
 
 PC-B>
 
 b. Отправьте Ping-запрос от PC-A к PC-B.  
 
-PC-A> ping 192.168.1.11
+PC-A> ping 192.168.5.11
 
-84 bytes from 192.168.1.11 icmp_seq=1 ttl=64 time=1.416 ms
-84 bytes from 192.168.1.11 icmp_seq=2 ttl=64 time=1.013 ms
-84 bytes from 192.168.1.11 icmp_seq=3 ttl=64 time=0.853 ms
-84 bytes from 192.168.1.11 icmp_seq=4 ttl=64 time=0.889 ms
-84 bytes from 192.168.1.11 icmp_seq=5 ttl=64 time=0.942 ms
+84 bytes from 192.168.5.11 icmp_seq=1 ttl=64 time=0.720 ms
+84 bytes from 192.168.5.11 icmp_seq=2 ttl=64 time=0.855 ms
+84 bytes from 192.168.5.11 icmp_seq=3 ttl=64 time=0.906 ms
+84 bytes from 192.168.5.11 icmp_seq=4 ttl=64 time=0.839 ms
+84 bytes from 192.168.5.11 icmp_seq=5 ttl=64 time=0.847 ms
 
-PC-A>
+
+
 
 ### Шаг 5: Сохраните основные конфигурации для маршрутизатора и обоих коммутаторов.  
 Сохраните текущую конфигурацию в конфигурации запуска из приглашения привилегированного режима EXEC.  
@@ -402,31 +387,32 @@ S2(config-if-range)#exit
 Примечание: PortFast и BPDU guard также можно включить глобально с помощью команд spanning-tree portfast default и spanning-tree portfast bpduguard в режиме глобальной конфигурации. 
 Примечание: Защита BPDU может быть включена на всех портах доступа, для которых включена функция PortFast. Эти порты никогда не должны получать BPDU. BPDU guard лучше всего развертывать на портах, ориентированных на пользователя, чтобы предотвратить несанкционированное расширение сети коммутатора злоумышленником. Если порт включен с помощью BPDU guard и получает BPDU, он отключен и должен быть повторно включен вручную. На порту можно настроить тайм-аут, допускающий ошибку, чтобы он мог автоматически восстанавливаться по истечении указанного периода времени.   
 b. Убедитесь, что защита BPDU настроена с помощью команды show spanning-tree interface f0/6 detail на S1.      
-S1# show spanning-tree interface f0/6 detail  
-    Port 6 (FastEthernet0/6) of VLAN0001 is designated forwarding  
-   Port path cost 19, Port priority 128, Port Identifier 128.6.  
-   Designated root has priority 1, address 001d.4635.0c80  
-   Designated bridge has priority 1, address 001d.4635.0c80  
-   Designated port id is 128.6, designated path cost 0  
-   Timers: message age 0, forward delay 0, hold 0  
-   Number of transitions to forwarding state: 1  
-   The port is in the portfast mode  
-   Link type is point-to-point by default  
-   Bpdu guard is enabled  
-   BPDU: sent 3349, received 0  
+S1#show spanning-tree interface Ethernet0/2
+
+Vlan                Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+VLAN0005            Desg FWD 100       128.3    Shr Edge
+S1#show spanning-tree interface Ethernet0/2 detail
+ Port 3 (Ethernet0/2) of VLAN0005 is designated forwarding
+   Port path cost 100, Port priority 128, Port Identifier 128.3.
+   Designated root has priority 5, address aabb.cc00.5000
+   Designated bridge has priority 5, address aabb.cc00.5000
+   Designated port id is 128.3, designated path cost 0
+   Timers: message age 0, forward delay 0, hold 0
+   Number of transitions to forwarding state: 1
+   The port is in the portfast edge mode
+   Link type is shared by default
+   Bpdu guard is enabled
+   Root guard is enabled on the port
+   BPDU: sent 2422, received 0
+S1#
+
 
 ### Шаг 3: Включите root guard.
 Root guard - это еще один вариант предотвращения несанкционированных переключений и подмены. Защита Root может быть включена на всех портах коммутатора, которые не являются корневыми портами. Обычно он включен только на портах, подключаемых к пограничным коммутаторам, где никогда не должен приниматься улучшенный BPDU. Каждый коммутатор должен иметь только один корневой порт, который является наилучшим путем к корневому коммутатору.
-a. Следующая команда настраивает root guard на интерфейсе S2 G0/1. Обычно это делается, если к этому порту подключен другой коммутатор. Root guard лучше всего развертывать на портах, которые подключаются к коммутаторам, которые не должны быть корневым мостом. В лабораторной топологии S1 F0/1 был бы наиболее логичным кандидатом на root guard. Однако S2 G0/1 показан здесь в качестве примера, поскольку гигабитные порты чаще используются для межпереключательных соединений.       
-S2(config)# interface g0/1  
-S2(config-if)# spanning-tree guard root  
-b. Выполните команду show run | begin Gig, чтобы убедиться, что защита root настроена.  
-S2# show run | begin Gig  
-interface GigabitEthernet0/1  
-spanning-tree guard root  
-### Примечание: Порт S2 Gi0/1 в данный момент не подключен, поэтому он не участвует в STP. В противном случае вы могли бы использовать команду show spanning-tree interface Gi0/1 detail.  
-### Примечание: Выражение в команде show run | begin чувствительно к регистру  
-c. Если порт, который включен с помощью BPDU guard, получает более высокий BPDU, он переходит в состояние, несовместимое с root. Используйте команду показать несогласованные порты связующего дерева, чтобы определить, есть ли какие-либо порты, которые в настоящее время получают более высокие BPDU, которых не должно быть.  
+a. Следующая команда настраивает root guard на интерфейсе S2 e0/1. Обычно это делается, если к этому порту подключен другой коммутатор. Root guard лучше всего развертывать на портах, которые подключаются к коммутаторам, которые не должны быть корневым мостом. В лабораторной топологии S1  был бы наиболее логичным кандидатом на root guard.        
+S2(config)#interface range Ethernet0/1-3
+S2(config-if-range)#spanning-tree guard root
 S2# show spanning-tree inconsistentports  
 
 Name                 Interface              Inconsistency   
@@ -453,7 +439,7 @@ Configured Pathcost method used is short
 
 Name                   Blocking Listening Learning Forwarding STP Active  
 ---------------------- -------- --------- -------- ---------- ----------  
-VLAN0001                     0         0        0          3          3   
+VLAN0005                     0         0        0          3          3   
 ---------------------- -------- --------- -------- ---------- ---------  
 
 ## Часть 4: Настройка безопасности портов и отключение неиспользуемых портов
@@ -461,23 +447,25 @@ VLAN0001                     0         0        0          3          3
 ### Шаг 1: Запишите MAC-адрес R1 G0/0/1.  
 Из командной строки R1 используйте команду show interface и запишите MAC-адрес интерфейса.  
 R1# show interfaces g0/0/1  
-GigabitEthernet0/1 is up, line protocol is up   
-  Hardware is CN Gigabit Ethernet, address is fc99.4775.c3e1 (bia fc99.4775.c3e1)  
-  Internet address is 192.168.1.1/24  
-  MTU 1500 bytes, BW 100000 Kbit/sec, DLY 100 usec,   
-     reliability 255/255, txload 1/255, rxload 1/255  
-  Encapsulation ARPA, loopback not set   
-  Keepalive set (10 sec)  
-  Full Duplex, 100Mbps, media type is RJ45   
-<Output Omitted>  
-### Каков MAC-адрес интерфейса R1 G0/0/1?   
+GigabitEthernet0/1 is up, line protocol is up
+  Hardware is iGbE, address is 5000.0006.0001 (bia 5000.0006.0001)
+  Internet address is 192.168.1.1/24
+  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec,
+     reliability 255/255, txload 1/255, rxload 1/255
+  Encapsulation ARPA, loopback not set
 
+### Каков MAC-адрес интерфейса R1 G0/0/1?   
+5000.0006.0001
 ### Шаг 2: Настройте базовую безопасность портов.
-Эта процедура должна выполняться на всех используемых портах доступа. Порт S1 F0/5 показан здесь в качестве примера.  
+Эта процедура должна выполняться на всех используемых портах доступа. Порт S1 e0/0 показан здесь в качестве примера.  
 a. Из командной строки S1 войдите в режим настройки интерфейса для порта, который подключается к маршрутизатору (FastEthernet0/5).  
-S1(config)# interface f0/5  
+S1(config)# interface e0/0  
 b. Выключите порт коммутатора.  
-S1(config-if)# shutdown  
+S1(config)#interface Ethernet0/0
+S1(config-if)#shutdown
+S1(config-if)#
+*Jun 29 14:18:53.210: %LINK-5-CHANGED: Interface Ethernet0/0, changed state to administratively down
+*Jun 29 14:18:54.214: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet0/0, changed state to down
 c. Включите режим защитного порта.  
 S1(config-if)# switchport port-security  
 Примечание: Порт коммутатора должен быть настроен как порт доступа, чтобы включить защиту порта.  
@@ -485,29 +473,29 @@ S1(config-if)# switchport port-security
 d. Настройте статическую запись для MAC-адреса интерфейса R1 G0/0/1, записанного на шаге 1.  
 S1(config-if)# switchport port-security mac-address xxxx.xxxx.xxxx   
 Примечание: xxxx.xxxx.xxxx - это фактический MAC-адрес интерфейса маршрутизатора G0/0/1.  
-Примечание: Вы также можете использовать команду switchport port-security mac-address sticky для добавления всех защищенных MAC-адресов, которые динамически запоминаются на порту (до максимального значения), в конфигурацию коммутатора.  
+Примечание: Вы также можете использовать команду switchport port-security mac-address sticky для добавления всех защищенных MAC-адресов, которые динамически запоминаются на порту (до максимального значения), в конфигурацию коммутатора. 
+S1(config-if)#switchport port-security mac-address 5000.0006.0001  
+
 e. Включите порт коммутатора.  
 S1(config-if)# no shutdown  
 ### Шаг 3: Проверьте безопасность порта на S1 F0/5.  
-a. На S1 выполните команду show port-security, чтобы убедиться, что безопасность порта настроена на S1 F0/5.  
-S1# show port-security interface f0/5  
-Port Security              : Enabled  
-Port Status                : Secure-up  
-Violation Mode             : Shutdown  
-Aging Time                 : 0 mins  
-Aging Type                 : Absolute  
-SecureStatic Address Aging : Disabled  
-Maximum MAC Addresses      : 1  
-Total MAC Addresses        : 1  
-Configured MAC Addresses   : 1  
-Sticky MAC Addresses       : 0  
-Last Source Address:Vlan   : 0000.0000.0000:0  
-Security Violation Count   : 0  
+a. На S1 выполните команду show port-security, чтобы убедиться, что безопасность порта настроена на S1 e0/0.  
+
+S1#show port-security
+
+Secure Port  MaxSecureAddr  CurrentAddr  SecurityViolation  Security Action
+                (Count)       (Count)          (Count)
+---------------------------------------------------------------------------
+      Et0/0              1            1                  0         Shutdown
+---------------------------------------------------------------------------
+Total Addresses in System (excluding one mac per port)     : 0
+Max Addresses limit in System (excluding one mac per port) : 4096
+
 
 Каково количество нарушений безопасности?  
 Введите свои ответы здесь.  
 
-Каков статус порта F0/5?  
+Каков статус порта e0/0?  
 Введите свои ответы здесь.  
 
 Каков последний адрес источника и VLAN?  
