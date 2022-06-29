@@ -128,144 +128,212 @@ S1# copy running-config startup-config
 В этой части вы настроите магистральные порты, измените собственную VLAN для магистральных портов и проверите конфигурацию магистрали.  
 Защита магистральных портов может помочь предотвратить атаки с перескакиванием VLAN. Лучший способ предотвратить базовую атаку с перескакиванием VLAN - это явно отключить транкинг на всех портах, кроме портов, которые специально требуют транкинга. На требуемых портах транкинга отключите переговоры DTP (auto trunking) и включите транкинг вручную. Если транкинг для интерфейса не требуется, настройте порт в качестве порта доступа. Это отключает транкинг в интерфейсе.  
 Примечание: Задачи должны выполняться на S1 или S2, как указано.
-S2(config)#switchport trunk native vlan 59  -встроенной vlan присваеваем номер нерабочей vlan 59
-S2(config)#interface range Ethernet0/1-3  привязываем интерфейс к vlan 5
-S2(config-if)#switchport access vlan 5
+
+
+
+
+S2(config)#interface range Ethernet0/2-3  отключаем не нужные порты
+S2(config-if)#shutdown 
 S2(config-if)#exit
 
+*Jun 29 10:50:54.636: %LINK-5-CHANGED: Interface Ethernet0/2, changed state to administratively down
+*Jun 29 10:50:54.645: %LINK-5-CHANGED: Interface Ethernet0/3, changed state to administratively down
+*Jun 29 10:50:55.640: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet0/2, changed state to down
+*Jun 29 10:50:55.649: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet0/3, changed state to down
 
 ### Шаг 1: Настройте S1 в качестве корневого коммутатора.  
 Для целей этой вкладки S2 в настоящее время является корневым мостом. Вы настроите S1 в качестве корневого моста, изменив уровень приоритета идентификатора моста.  
 a. Из консоли на S1 войдите в режим глобальной конфигурации.    
 b. Приоритет по умолчанию для S1 и S2 равен 32769 (32768 + 1 с расширением системного идентификатора). Установите приоритет S1 равным 0, чтобы он стал корневым коммутатором.  
-S1(config)# spanning-tree vlan 1 priority 0
+S1(config)# spanning-tree vlan 5 priority 0
 S1(config)# exit
 ### Примечание: Вы также можете использовать команду spanning-tree vlan 1 root primary, чтобы сделать S1 корневым коммутатором для VLAN 1.  
 c. Выполните команду show spanning-tree , чтобы убедиться, что S1 является корневым мостом, чтобы увидеть используемые порты и их статус.  
-S1# show spanning-tree  
+S1#sh interfaces trunk
 
-VLAN0001  
-  Spanning tree enabled protocol ieee  
-  Root ID    Priority    1  
-             Address     001d.4635.0c80   
-             This bridge is the root  
-             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec  
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/1       on               802.1q         trunking      59
 
-  Bridge ID  Priority    1      (priority 0 sys-id-ext 1)  
-             Address     001d.4635.0c80  
-             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec  
-             Aging Time 300  
+Port        Vlans allowed on trunk
+Et0/1       5
 
-Interface        Role Sts Cost      Prio.Nbr Type  
----------------- ---- --- --------- -------- --------------------------------  
-Fa0/1            Desg FWD 19        128.1    P2p  
-Fa0/5            Desg FWD 19        128.5    P2p   
-Fa0/6            Desg FWD 19        128.6    P2p  
+Port        Vlans allowed and active in management domain
+Et0/1       5
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/1       5
+S1#
+
+S2#sh interfaces trunk
+
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/0       auto             802.1q         trunking      59
+
+Port        Vlans allowed on trunk
+Et0/0       5
+
+Port        Vlans allowed and active in management domain
+Et0/0       5
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/0       5
+S2#
+
+
 ### Вопрос:  
 ### Каков приоритет S1?  
 ### Какие порты используются и каков их статус?   
 
 ### Шаг 2: Настройте магистральные порты на S1 и S2.  
-a. Настройте порт F0/1 на S1 в качестве магистрального порта.   
-S1(config)# interface f0/1  
-S1(config-if)# switchport mode trunk  
+a. Настройте порт e0/1 на S1 в качестве магистрального порта.   
+S1(config)#interface Ethernet0/1
+S1(config-if)#switchport trunk encapsulation dot1q
+S1(config-if)#switchport mode trunk
+S1(config-if)#switchport trunk allowed vlan 5 (привязываем порт к VLAN 5)
+ 
 ### Примечание: При выполнении этой лабораторной работы с коммутатором 3560 пользователь должен сначала ввести команду switchport trunk encapsulation dot1q.    
-b. Настройте порт F0/1 на S2 в качестве магистрального порта.  
-S2(config)# interface f0/1  
-S2(config-if)# switchport mode trunk  
-c. Убедитесь, что порт S1 F0/1 находится в режиме транкинга, с помощью команды show interfaces trunk.  
-S1# show interfaces trunk  
-
-Port        Mode         Encapsulation  Status        Native vlan  
-Fa0/1       on           802.1q         trunking      1  
-
-Port        Vlans allowed on trunk  
-Fa0/1       1-4094  
-
-Port        Vlans allowed and active in management domain  
-Fa0/1       1  
-
-Port        Vlans in spanning tree forwarding state and not pruned  
-Fa0/1       1  
+b. Настройте порт e0/0 на S2 в качестве магистрального порта.  
+S2(config)#interface Ethernet0/0
+S2(config-if)#switchport trunk encapsulation dot1q
+S2(config-if)#switchport mode trunk
+S2(config-if)#switchport trunk allowed vlan 5 (привязываем порт к VLAN 5)
 
 ### Шаг 3: Измените собственную VLAN для магистральных портов на S1 и S2.  
 a. Изменение собственной VLAN для магистральных портов на неиспользуемую VLAN помогает предотвратить атаки с перескакиванием VLAN.    
 Вопрос:  
 Из выходных данных команды show interfaces trunk на предыдущем шаге, какова текущая собственная VLAN для интерфейса магистрали S1 F0/1?    
-b. Установите для собственной VLAN на магистральном интерфейсе S1 F0/1 значение неиспользуемой VLAN 99.  
-S1(config)# interface f0/1  
-S1(config-if)# switchport trunk native vlan 99  
-S1(config-if)# end  
+b. Установите для собственной VLAN на магистральном интерфейсе S1 e0/1 значение неиспользуемой VLAN 99.  
+S1(config)#interface Ethernet0/0  -встроенной vlan присваеваем номер нерабочей vlan 59 (только для транка)
+S1(config-if)#switchport trunk native vlan 59
+S1(config-if)#exit
 c. Через короткий промежуток времени должно появиться следующее сообщение:  
-02:16:28: %CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on FastEthernet0/1 (99), with S2 FastEthernet0/1 (1).  
-Что означает это сообщение?  
-d. Установите для собственной VLAN на магистральном интерфейсе S2 F0/1 значение VLAN 99.  
-S2(config)# interface f0/1  
-S2(config-if)# switchport trunk native vlan 99  
+*Jun 29 11:48:07.345: %CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on Ethernet0/1 (59), with S2 Ethernet0/0 (1).
+  
+Что означает это сообщение?
+Обнаружено несоответствие собственной VLAN коммутатора S1  и коммутатора S2 
+d. Установите для собственной VLAN на магистральном интерфейсе S2 e0/0 значение VLAN 59.  
+S2(config)# interface e0/0  
+S2(config-if)# switchport trunk native vlan 59  
 S2(config-if)# end  
 ### Шаг 4: Предотвратите использование DTP на S1 и S2.
-Установка для магистрального порта значения nonegotiate также помогает уменьшить переключение VLAN, отключив генерацию кадров DTP.
-S1(config)# interface f0/1   
-S1(config-if)# switchport nonegotiate  
+S2(config)#interface range Ethernet0/1-3  отключаем trunk  на портах
+S2(config-if)#switchport mode access 
+S2(config-if)#exit
 
-S2(config)# interface f0/1  
-S2(config-if)# switchport nonegotiate  
-Шаг 5: Проверьте конфигурацию транкинга на порту F0/1.  
-S1# show interfaces f0/1 trunk  
+S2#sh interface switchport
+Name: Et0/0
+Switchport: Enabled
+Administrative Mode: dynamic auto
+Operational Mode: static access
+Administrative Trunking Encapsulation: dot1q
+Operational Trunking Encapsulation: native
+Negotiation of Trunking: On
+Access Mode VLAN: 1 (default)
+Trunking Native Mode VLAN: 59 (Inactive)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none
+Administrative private-vlan mapping: none
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: 5
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
 
-Port        Mode         Encapsulation  Status        Native vlan  
-Fa0/1       on           802.1q         trunking      99  
-  
-Port        Vlans allowed on trunk  
-Fa0/1       1-4094  
+Protected: false
+Appliance trust: none
 
-Port        Vlans allowed and active in management domain  
-Fa0/1       1  
-  
-Port        Vlans in spanning tree forwarding state and not pruned  
-Fa0/1       1  
+Name: Et0/1
+Switchport: Enabled
+Administrative Mode: static access
+Operational Mode: static access
+Administrative Trunking Encapsulation: negotiate
+Operational Trunking Encapsulation: native
+Negotiation of Trunking: Off
+Access Mode VLAN: 5 (otus)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none
+Administrative private-vlan mapping: none
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: ALL
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
 
-S1# show interfaces f0/1 switchport  
+Protected: false
+Appliance trust: none
 
-Name: Fa0/1  
-Switchport: Enabled  
-Administrative Mode: trunk  
-Operational Mode: trunk  
-Administrative Trunking Encapsulation: dot1q  
-Operational Trunking Encapsulation: dot1q  
-Negotiation of Trunking: Off  
-Access Mode VLAN: 1 (default)  
-Trunking Native Mode VLAN: 99 (Inactive)  
-Administrative Native VLAN tagging: enabled  
-Voice VLAN: none  
-Administrative private-vlan host-association: none  
-Administrative private-vlan mapping: none  
-Administrative private-vlan trunk native VLAN: none  
-Administrative private-vlan trunk Native VLAN tagging: enabled 
-Administrative private-vlan trunk encapsulation: dot1q 
-Administrative private-vlan trunk normal VLANs: none  
-Administrative private-vlan trunk private VLANs: none 
-Operational private-vlan: none 
-Trunking VLANs Enabled: ALL    
-Pruning VLANs Enabled: 2-1001   
-Capture Mode Disabled   
-Capture VLANs Allowed: ALL  
+Name: Et0/2
+Switchport: Enabled
+Administrative Mode: static access
+Operational Mode: down
+Administrative Trunking Encapsulation: negotiate
+Negotiation of Trunking: Off
+Access Mode VLAN: 5 (otus)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none
+Administrative private-vlan mapping: none
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: ALL
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
 
-Protected: false  
-Unknown unicast blocked: disabled  
-Unknown multicast blocked: disabled  
-Appliance trust: none  
+Protected: false
+Appliance trust: none
 
-### Шаг 6: Проверьте конфигурацию с помощью команды show run.  
-Используйте команду show run для отображения текущей конфигурации, начиная с первой строки, содержащей текстовую строку “0/1”.  
+Name: Et0/3
+Switchport: Enabled
+Administrative Mode: static access
+Operational Mode: down
+Administrative Trunking Encapsulation: negotiate
+Negotiation of Trunking: Off
+Access Mode VLAN: 5 (otus)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none
+Administrative private-vlan mapping: none
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: ALL
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
 
-S1# show run | begin 0/1  
-interface FastEthernet0/1  
- switchport trunk native vlan 99  
- switchport mode trunk  
- switchport nonegotiate  
-  
-<output omitted>  
+Protected: false
+Appliance trust: none
+
+## Negotiation of Trunking: Off  - согласование транкинг - отключено
+
+
 ### Шаг 7: Отключите транкинг на портах доступа S1.  
 a. На S1 настройте F0/5, порт, к которому подключен R1, только в режиме доступа.  
 S1(config)# interface f0/5  
