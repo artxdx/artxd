@@ -362,12 +362,30 @@ S1(config-if)# spanning-tree portfast
 
 %Portfast has been configured on FastEthernet0/5 but will only  
  have effect when the interface is in a non-trunking mode.  
-b. Включите PortFast на порту доступа S1 F0/6.  
-S1(config)# interface f0/6  
-S1(config-if)# spanning-tree portfast  
-c. Включите PortFast на портах доступа S2 F0/18.  
-S2(config)# interface f0/18  
-S2(config-if)# spanning-tree portfast  
+b. Включите PortFast на порту доступа S1 e0/2.  
+S1(config)#interface Ethernet0/2
+S1(config-if)#spanning-tree portfast
+%Warning: portfast should only be enabled on ports connected to a single
+ host. Connecting hubs, concentrators, switches, bridges, etc... to this
+ interface  when portfast is enabled, can cause temporary bridging loops.
+ Use with CAUTION
+
+%Portfast has been configured on Ethernet0/2 but will only
+ have effect when the interface is in a non-trunking mode.
+S1(config-if)#exit
+
+c. Включите PortFast на портах доступа S2 e0/1.  
+S2(config)#interface Ethernet0/1
+ S2(config-if)#spanning-tree portfast
+
+%Warning: portfast should only be enabled on ports connected to a single
+ host. Connecting hubs, concentrators, switches, bridges, etc... to this
+ interface  when portfast is enabled, can cause temporary bridging loops.
+ Use with CAUTION
+
+%Portfast has been configured on Ethernet0/1 but will only
+ have effect when the interface is in a non-trunking mode.
+
 ### Шаг 2: Включите защиту BPDU.  
 BPDU guard - это функция, которая может помочь предотвратить несанкционированные коммутаторы и подмену портов доступа.  
 a. Включите защиту BPDU на порту коммутатора F0/6.         
