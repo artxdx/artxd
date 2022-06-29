@@ -51,8 +51,8 @@ S1(config)#spanning-tree portfast edge bpduguard
 Открыть окно конфигурации
 Настройте имена хостов, как показано в топологии.
 Настройте IP-адреса интерфейса, как показано в таблице IP-адресации. Следующая конфигурация отображает интерфейс управления VLAN 1 на S1:   
-S1(config)# interface vlan 1    
-S1(config-if)# ip address 192.168.1.2 255.255.255.0    
+S1(config)# interface vlan 5    
+S1(config-if)# ip address 192.168.5.2 255.255.255.0    
 S1(config-if)# no shutdown    
 Предотвратите попытки маршрутизатора или коммутатора перевести неправильно введенные команды, отключив поиск DNS.    
 S1 показан здесь в качестве примера  
@@ -72,7 +72,7 @@ S1(config-line)# logging synchronous
 ### Шаг 3: Настройте параметры IP-адреса хоста ПК.  
 Настройте статический IP-адрес, маску подсети и шлюз по умолчанию для PCA и PCB, как показано в таблице адресации.  
 ### Шаг 4: Проверьте базовое сетевое подключение.     
-a. Отправьте Ping-запрос от PCA и PCB к интерфейсу R1 G0/0/1 по IP-адресу 192.168.1.1
+a. Отправьте Ping-запрос от PCA и PCB к интерфейсу R1 G0/0/1 по IP-адресу 192.168.5.1
 PC-A> ping 192.168.5.1
 
 84 bytes from 192.168.5.1 icmp_seq=1 ttl=255 time=1.779 ms
@@ -132,43 +132,55 @@ a. Из консоли на S1 войдите в режим глобальной
 b. Приоритет по умолчанию для S1 и S2 равен 32769 (32768 + 1 с расширением системного идентификатора). Установите приоритет S1 равным 0, чтобы он стал корневым коммутатором.  
 S1(config)# spanning-tree vlan 5 priority 0
 S1(config)# exit
-### Примечание: Вы также можете использовать команду spanning-tree vlan 1 root primary, чтобы сделать S1 корневым коммутатором для VLAN 1.  
+### Примечание: Вы также можете использовать команду spanning-tree vlan 5 root primary, чтобы сделать S1 корневым коммутатором для VLAN 5.  
 c. Выполните команду show spanning-tree , чтобы убедиться, что S1 является корневым мостом, чтобы увидеть используемые порты и их статус.  
-S1#sh interfaces trunk
+S1#show spanning-tree
+VLAN0005
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    5
+             Address     aabb.cc00.5000
+             This bridge is the root
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
 
-Port        Mode             Encapsulation  Status        Native vlan
-Et0/1       on               802.1q         trunking      59
+  Bridge ID  Priority    5      (priority 0 sys-id-ext 5)
+             Address     aabb.cc00.5000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
 
-Port        Vlans allowed on trunk
-Et0/1       5
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Desg FWD 100       128.1    Shr
+Et0/1               Desg FWD 100       128.2    Shr
+Et0/2               Desg FWD 100       128.3    Shr Edge
+Et0/3               Desg FWD 100       128.4    Shr
 
-Port        Vlans allowed and active in management domain
-Et0/1       5
+S2#show spanning-tree
+VLAN0005
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    5
+             Address     aabb.cc00.5000
+             Cost        100
+             Port        1 (Ethernet0/0)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
 
-Port        Vlans in spanning tree forwarding state and not pruned
-Et0/1       5
-S1#
+  Bridge ID  Priority    32773  (priority 32768 sys-id-ext 5)
+             Address     aabb.cc00.7000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
 
-S2#sh interfaces trunk
-
-Port        Mode             Encapsulation  Status        Native vlan
-Et0/0       auto             802.1q         trunking      59
-
-Port        Vlans allowed on trunk
-Et0/0       5
-
-Port        Vlans allowed and active in management domain
-Et0/0       5
-
-Port        Vlans in spanning tree forwarding state and not pruned
-Et0/0       5
-S2#
-
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Root FWD 100       128.1    Shr
+Et0/1               Desg FWD 100       128.2    Shr Edge
 
 ### Вопрос:  
-### Каков приоритет S1?  
+### Каков приоритет S1? 
+Приоритет коммутатора S1 равен нулю.
+"This bridge is the root" -данный коммутатор является корневым.
 ### Какие порты используются и каков их статус?   
-
+Коммутатор S1 -все 4 порта являются назначенными в режиме пересылки
+Также порты находятся в режиме shared (half-duplex) - полудуплекс либо передает либо получает.
+Et0/2 - является пограничным портом(к нему подключено конечное устройство)
 ### Шаг 2: Настройте магистральные порты на S1 и S2.  
 a. Настройте порт e0/1 на S1 в качестве магистрального порта.   
 S1(config)#interface Ethernet0/1
