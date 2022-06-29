@@ -216,7 +216,7 @@ S2(config)# interface e0/0
 S2(config-if)# switchport trunk native vlan 59  
 S2(config-if)# end  
 ### Шаг 4: Предотвратите использование DTP на S1 и S2.
-S2(config)#interface range Ethernet0/1-3  отключаем trunk  на портах
+S2(config)#interface range Ethernet0/1-3  отключаем trunk  на портах (кроме корневого)
 S2(config-if)#switchport mode access 
 S2(config-if)#exit
 
@@ -354,14 +354,17 @@ S1(config-if)#exit
 Топология имеет только два коммутатора и не имеет избыточных путей, но STP все еще активен. В этой части вы включите функции безопасности коммутаторов, которые могут помочь уменьшить вероятность того, что злоумышленник манипулирует коммутаторами с помощью методов, связанных с STP.   
 ### Шаг 1: Включите portfast.  
 PortFast настраивается на портах доступа, которые подключаются к одной рабочей станции или серверу, что позволяет им быстрее становиться активными         
-a. Включите PortFast на порту доступа S1 F0/5.  
-S1(config)# interface f0/5
-S1(config-if)# spanning-tree portfast
+a. Включите PortFast на порту доступа S1 e0/0.  
+S1(config)#interface Ethernet0/0  
+S1(config-if)#spanning-tree portfast
+%Warning: portfast should only be enabled on ports connected to a single
+ host. Connecting hubs, concentrators, switches, bridges, etc... to this
+ interface  when portfast is enabled, can cause temporary bridging loops.
+ Use with CAUTION
 
-%Warning: portfast should only be enabled on ports connected to a single host. Connecting hubs, concentrators, switches, bridges, etc... to this interface when portfast is enabled, can cause temporary bridging loops. Use with CAUTION   
+%Portfast has been configured on Ethernet0/0 but will only
+ have effect when the interface is in a non-trunking mode.
 
-%Portfast has been configured on FastEthernet0/5 but will only  
- have effect when the interface is in a non-trunking mode.  
 b. Включите PortFast на порту доступа S1 e0/2.  
 S1(config)#interface Ethernet0/2
 S1(config-if)#spanning-tree portfast
@@ -388,11 +391,14 @@ S2(config)#interface Ethernet0/1
 
 ### Шаг 2: Включите защиту BPDU.  
 BPDU guard - это функция, которая может помочь предотвратить несанкционированные коммутаторы и подмену портов доступа.  
-a. Включите защиту BPDU на порту коммутатора F0/6.         
-S1(config)# interface f0/6
+a. Включите защиту BPDU на порту коммутатора e0/0.         
+S1(config)#interface Ethernet0/0
 S1(config-if)# spanning-tree bpduguard enable
-S2(config)# interface f0/18
-S2(config-if)# spanning-tree bpduguard enable
+S1(config-if)#interface Ethernet0/2
+S1(config-if)#spanning-tree  bpduguard enable
+S2(config)#interface range Ethernet0/1-3
+S2(config-if-range)#spanning-tree bpduguard enable
+S2(config-if-range)#exit
 Примечание: PortFast и BPDU guard также можно включить глобально с помощью команд spanning-tree portfast default и spanning-tree portfast bpduguard в режиме глобальной конфигурации. 
 Примечание: Защита BPDU может быть включена на всех портах доступа, для которых включена функция PortFast. Эти порты никогда не должны получать BPDU. BPDU guard лучше всего развертывать на портах, ориентированных на пользователя, чтобы предотвратить несанкционированное расширение сети коммутатора злоумышленником. Если порт включен с помощью BPDU guard и получает BPDU, он отключен и должен быть повторно включен вручную. На порту можно настроить тайм-аут, допускающий ошибку, чтобы он мог автоматически восстанавливаться по истечении указанного периода времени.   
 b. Убедитесь, что защита BPDU настроена с помощью команды show spanning-tree interface f0/6 detail на S1.      
