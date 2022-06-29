@@ -15,7 +15,6 @@
  Отключите транкинг.    
 ## Часть 3: Защита От STP-Атак    
  Включите PortFast и BPDU guard.  
-S1(config)#spanning-tree portfast edge bpduguard  
  Проверьте защиту BPDU guard.     
  Включите root guard.    
  Включить loop guard.  
@@ -187,19 +186,54 @@ S1(config)#interface Ethernet0/1
 S1(config-if)#switchport trunk encapsulation dot1q
 S1(config-if)#switchport mode trunk
 S1(config-if)#switchport trunk allowed vlan 5 (привязываем порт к VLAN 5)
- 
 ### Примечание: При выполнении этой лабораторной работы с коммутатором 3560 пользователь должен сначала ввести команду switchport trunk encapsulation dot1q.    
+Выводим данные по транкам
+
+S1#show interfaces trunk
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/0       on               802.1q         trunking      59
+Et0/1       on               802.1q         trunking      59
+
+Port        Vlans allowed on trunk
+Et0/0       5
+Et0/1       5
+
+Port        Vlans allowed and active in management domain
+Et0/0       5
+Et0/1       5
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/0       5
+Et0/1       5
+
 b. Настройте порт e0/0 на S2 в качестве магистрального порта.  
 S2(config)#interface Ethernet0/0
 S2(config-if)#switchport trunk encapsulation dot1q
 S2(config-if)#switchport mode trunk
 S2(config-if)#switchport trunk allowed vlan 5 (привязываем порт к VLAN 5)
 
+Выводим данные по транкам
+S2#show interfaces trunk
+
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/0       auto             802.1q         trunking      59
+
+Port        Vlans allowed on trunk
+Et0/0       5
+
+Port        Vlans allowed and active in management domain
+Et0/0       5
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/0       5
+
+
 ### Шаг 3: Измените собственную VLAN для магистральных портов на S1 и S2.  
 a. Изменение собственной VLAN для магистральных портов на неиспользуемую VLAN помогает предотвратить атаки с перескакиванием VLAN.    
 Вопрос:  
-Из выходных данных команды show interfaces trunk на предыдущем шаге, какова текущая собственная VLAN для интерфейса магистрали S1 F0/1?    
-b. Установите для собственной VLAN на магистральном интерфейсе S1 e0/1 значение неиспользуемой VLAN 99.  
+Из выходных данных команды show interfaces trunk на предыдущем шаге, какова текущая собственная VLAN для интерфейса магистрали S1 E0/1? 
+VLAN 5
+b. Установите для собственной VLAN на магистральном интерфейсе S1 e0/1 значение неиспользуемой VLAN 59.  
 S1(config)#interface Ethernet0/0  -встроенной vlan присваеваем номер нерабочей vlan 59 (только для транка)
 S1(config-if)#switchport trunk native vlan 59
 S1(config-if)#exit
@@ -207,23 +241,27 @@ c. Через короткий промежуток времени должно 
 *Jun 29 11:48:07.345: %CDP-4-NATIVE_VLAN_MISMATCH: Native VLAN mismatch discovered on Ethernet0/1 (59), with S2 Ethernet0/0 (1).
   
 Что означает это сообщение?
-Обнаружено несоответствие собственной VLAN коммутатора S1  и коммутатора S2 
+Обнаружено несоответствие собственной VLAN коммутатора S1  и коммутатора S2
+Для того чтобы не выводилось данное сообщение .Необходимо установить такое же значение неиспользуемой VLAN 59 для коммутатора S2  
 d. Установите для собственной VLAN на магистральном интерфейсе S2 e0/0 значение VLAN 59.  
 S2(config)# interface e0/0  
 S2(config-if)# switchport trunk native vlan 59  
-S2(config-if)# end  
-### Шаг 4: Предотвратите использование DTP на S1 и S2.
-S2(config)#interface range Ethernet0/1-3  отключаем trunk  на портах (кроме корневого)
-S2(config-if)#switchport mode access 
-S2(config-if)#exit
+S2(config-if)# end    
+### Шаг 4: Предотвратите использование DTP на S1 и S2.  
+S2(config)#interface range Ethernet0/0-3  отключаем DTP на портах.  
+S2(config-if)#switchport nonegotiate   
+S2(config-if)#exit  
+Command rejected: Conflict between 'nonegotiate' and 'dynamic' status on this interface: Et0/0  - в данном случае отключить DTP на магистральном порту не получилось.   
+
+Выводим данные по интерфейсам
 
 S2#sh interface switchport
 Name: Et0/0
 Switchport: Enabled
 Administrative Mode: dynamic auto
-Operational Mode: static access
+Operational Mode: trunk
 Administrative Trunking Encapsulation: dot1q
-Operational Trunking Encapsulation: native
+Operational Trunking Encapsulation: dot1q
 Negotiation of Trunking: On
 Access Mode VLAN: 1 (default)
 Trunking Native Mode VLAN: 59 (Inactive)
@@ -274,77 +312,24 @@ Capture VLANs Allowed: ALL
 Protected: false
 Appliance trust: none
 
-Name: Et0/2
-Switchport: Enabled
-Administrative Mode: static access
-Operational Mode: down
-Administrative Trunking Encapsulation: negotiate
-Negotiation of Trunking: Off
-Access Mode VLAN: 5 (otus)
-Trunking Native Mode VLAN: 1 (default)
-Administrative Native VLAN tagging: enabled
-Voice VLAN: none
-Administrative private-vlan host-association: none
-Administrative private-vlan mapping: none
-Administrative private-vlan trunk native VLAN: none
-Administrative private-vlan trunk Native VLAN tagging: enabled
-Administrative private-vlan trunk encapsulation: dot1q
-Administrative private-vlan trunk normal VLANs: none
-Administrative private-vlan trunk associations: none
-Administrative private-vlan trunk mappings: none
-Operational private-vlan: none
-Trunking VLANs Enabled: ALL
-Pruning VLANs Enabled: 2-1001
-Capture Mode Disabled
-Capture VLANs Allowed: ALL
-
-Protected: false
-Appliance trust: none
-
-Name: Et0/3
-Switchport: Enabled
-Administrative Mode: static access
-Operational Mode: down
-Administrative Trunking Encapsulation: negotiate
-Negotiation of Trunking: Off
-Access Mode VLAN: 5 (otus)
-Trunking Native Mode VLAN: 1 (default)
-Administrative Native VLAN tagging: enabled
-Voice VLAN: none
-Administrative private-vlan host-association: none
-Administrative private-vlan mapping: none
-Administrative private-vlan trunk native VLAN: none
-Administrative private-vlan trunk Native VLAN tagging: enabled
-Administrative private-vlan trunk encapsulation: dot1q
-Administrative private-vlan trunk normal VLANs: none
-Administrative private-vlan trunk associations: none
-Administrative private-vlan trunk mappings: none
-Operational private-vlan: none
-Trunking VLANs Enabled: ALL
-Pruning VLANs Enabled: 2-1001
-Capture Mode Disabled
-Capture VLANs Allowed: ALL
-
-Protected: false
-Appliance trust: none
+% Range command terminated because it failed on Ethernet0/0
 
 ## Negotiation of Trunking: Off  - согласование транкинг - отключено
 
-
 ### Шаг 7: Отключите транкинг на портах доступа S1.  
 a. На S1 настройте e0/0, порт, к которому подключен R1, только в режиме доступа.  
-S1(config)#interface Ethernet0/0
-S1(config-if)#switchport mode access
-S1(config-if)#exit
-
+Данный порт работает в режиме транкинга
 b. На S1 настройте e0/2, порт, к которому подключен PCA, только в режиме доступа.
-Переключим все порты кроме корневого в режим доступа
+Переведем все оставшиеся порты в режим доступа
 S1(config)#interface range Ethernet0/2-3
-S1(config-if)#switchport mode access
+S1(config-if)#switchport access
 S1(config-if)#exit 
 ### Шаг 8: Отключите транкинг на портах доступа S2.
 На S2 настройте e0/1, порт, к которому подключена PCB, только в режиме доступа.  
-На шаге 4 все порты кроме корневого переведены в режим доступа 
+Переведем все оставшиеся порты в режим доступа
+S2(config)#interface range Ethernet0/1-3
+S2(config-if)#switchport access
+S2(config-if)#exit
 
 ## Часть 3: Защита От STP-Атак
 Сетевые злоумышленники надеются подделать свою систему или мошеннический коммутатор, который они добавляют в сеть, в качестве корневого моста в топологии, манипулируя параметрами корневого моста STP. Если порт, настроенный с помощью PortFast, получает BPDU, STP может перевести порт в состояние блокировки с помощью функции, называемой BPDU guard.  
