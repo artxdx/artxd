@@ -509,8 +509,8 @@ S1(config-if)#spanning-tree bpduguard enable
 S1(config-if)#spanning-tree portfast edge  
 ### Шаг 6: (Необязательно) Настройте безопасность портов для VoIP.  
  В этом примере показана типичная конфигурация безопасности порта для голосового порта. Разрешены три MAC-адреса, которые должны быть изучены динамически. Один MAC-адрес предназначен для IP-телефона, один - для коммутатора и один - для ПК, подключенного к IP-телефону. Нарушения этой политики приводят к закрытию порта. Время ожидания устаревания для изученных MAC-адресов установлено равным двум часам.    
-В следующем примере отображается порт S2 F0/18:  
-S2(config)# interface f0/18  
+В следующем примере отображается порт S2 e0/1:  
+S2(config)# interface e0/1  
 S2(config-if)# switchport mode access  
 S2(config-if)# switchport port-security  
 S2(config-if)# switchport port-security maximum 3  
@@ -518,16 +518,15 @@ S2(config-if)# switchport port-security violation shutdown
 S2(config-if)# switchport port-security aging time 120  
 ### Шаг 7: Отключите неиспользуемые порты на S1 и S2.  
 В качестве дополнительной меры безопасности отключите порты, которые не используются на коммутаторе.  
-a. Порты F0/1, F0/5 и F0/6 используются на S1. Остальные порты Fast Ethernet и два порта Gigabit Ethernet будут отключены.  
-S1(config)# interface range f0/2 - 4  
-S1(config-if-range)# shutdown  
-S1(config-if-range)# interface range f0/7 - 24  
-S1(config-if-range)# shutdown  
-S1(config-if-range)# interface range g0/1 - 2  
-S1(config-if-range)# shutdown  
-b. Порты F0/1 и F0/18 используются на S2. Остальные порты Fast Ethernet и порты Gigabit Ethernet будут отключены. 
-S2(config)# interface range f0/2 – 17, f0/19 – 24, g0/1 - 2  
-S2(config-if-range)# shutdown  
+a. Порты e0/0, e0/1 и e0/2 используются на S1. Остальные порты  будут отключены.  
+S1(config)#interface e0/3
+S1(config-if)#shutdown
+S1(config-if)#
+*Jun 30 10:08:22.921: %LINK-5-CHANGED: Interface Ethernet0/3, changed state to administratively down
+*Jun 30 10:08:23.925: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet0/3, changed state to down
+b. Порты e0/0 и e0/1 используются на S2. Остальные будут отключены. 
+S2(config)#interface range e0/2-3
+S2(config-if-range)#shutdown
 ### Шаг 8: Переместите активные порты в VLAN, отличную от VLAN 1 по умолчанию.  
 В качестве дополнительной меры безопасности вы можете переместить все активные порты конечного пользователя и порты маршрутизатора в VLAN, отличную от VLAN 1 по умолчанию на обоих коммутаторах.  
 a. Настройте новую VLAN для пользователей на каждом коммутаторе, используя следующие команды:  
@@ -537,53 +536,55 @@ S1(config-vlan)# name Users
 S2(config)# vlan 20  
 S2(config-vlan)# name Users  
 b. Добавьте текущие активные порты доступа (не магистральные) в новую VLAN.  
-S1(config)# interface f0/6  
-S1(config-if-range)# switchport access vlan 20  
-
-S2(config)# interface f0/18  
+S1(config)#interface e0/2
+S1(config-if)#switchport access vlan 20
+S1(config-if)#exit
+S2(config)# interface e0/1  
 S2(config-if)# switchport access vlan 20  
 ### Примечание: Это предотвратит связь между хостами конечных пользователей и IP-адресом VLAN управления коммутатора, который в настоящее время является VLAN 1. Доступ к коммутатору по-прежнему можно получить и настроить с помощью консольного подключения.
 Примечание: Чтобы обеспечить SSH-доступ к коммутатору, определенный порт может быть назначен в качестве порта управления и добавлен в VLAN 1 с подключенной конкретной рабочей станцией управления. Более сложным решением является создание новой VLAN для управления коммутаторами (или использование существующей собственной магистральной VLAN 99) и настройка отдельной подсети для управляющих и пользовательских VLAN. 
 ### Шаг 9: Настройте порт с помощью функции PVLAN Edge.
 Некоторые приложения требуют, чтобы трафик не пересылался на уровне 2 между портами на одном и том же коммутаторе, чтобы один сосед не видел трафик, генерируемый другим соседом. В такой среде использование пограничной функции частной VLAN (PVLAN), также известной как защищенные порты, гарантирует отсутствие обмена одноадресным, широковещательным или многоадресным трафиком между этими портами коммутатора. Пограничная функция PVLAN может быть реализована только для портов на одном коммутаторе и является локально значимой.  
-Например, чтобы предотвратить трафик между хостом PC-A на S1 (порт F0/6) и хостом на другом порту S1 (например, порт F0/7, который ранее был отключен), вы можете использовать команду switchport protected для активации пограничной функции PVLAN на этих двух портах. Используйте команду настройки защищенного интерфейса no switchport, чтобы отключить защищенный порт.  
+Например, чтобы предотвратить трафик между хостом PC-A на S1 (порт F0/6) и хостом на другом порту S1 (например, порт e0/3, который ранее был отключен), вы можете использовать команду switchport protected для активации пограничной функции PVLAN на этих двух портах. Используйте команду настройки защищенного интерфейса no switchport, чтобы отключить защищенный порт.  
 a. Настройте функцию PVLAN Edge в режиме настройки интерфейса, используя следующие команды:  
-S1(config)# interface f0/6    
+S1(config)# interface e0/2    
 S1(config-if)# switchport protected    
-S1(config-if)# interface f0/7    
+S1(config-if)# interface e0/3    
 S1(config-if)# switchport protected    
 S1(config-if)# no shut    
 S1(config-if)# end    
 b. Убедитесь, что пограничная функция PVLAN (protected port) включена на F0/6.    
-S1# show interfaces f0/6 switchport  
-Name: Fa0/6  
-Switchport: Enabled  
-Administrative Mode: dynamic auto  
-Operational Mode: static access  
-Administrative Trunking Encapsulation: dot1q  
-Negotiation of Trunking: On  
-Access Mode VLAN: 20 (Users)  
-Trunking Native Mode VLAN: 1 (default)  
-Administrative Native VLAN tagging: enabled  
-Voice VLAN: none  
-Administrative private-vlan host-association: none  
-Administrative private-vlan mapping: none  
-Administrative private-vlan trunk native VLAN: none  
-Administrative private-vlan trunk Native VLAN tagging: enabled  
-Administrative private-vlan trunk encapsulation: dot1q  
-Administrative private-vlan trunk normal VLANs: none  
-Administrative private-vlan trunk private VLANs: none  
-Operational private-vlan: none  
-Trunking VLANs Enabled: ALL  
-Pruning VLANs Enabled: 2-1001  
-Capture Mode Disabled  
-Capture VLANs Allowed: ALL   
-Protected: true   
-Unknown unicast blocked: disabled  
-Unknown multicast blocked: disabled  
-Appliance trust: none  
+S1# show interfaces e0/2 switchport  
+Name: Et0/2
+Switchport: Enabled
+Administrative Mode: static access
+Operational Mode: static access
+Administrative Trunking Encapsulation: negotiate
+Operational Trunking Encapsulation: native
+Negotiation of Trunking: Off
+Access Mode VLAN: 20 (Users)
+Trunking Native Mode VLAN: 1 (default)
+Administrative Native VLAN tagging: enabled
+Voice VLAN: none
+Administrative private-vlan host-association: none
+Administrative private-vlan mapping: none
+Administrative private-vlan trunk native VLAN: none
+Administrative private-vlan trunk Native VLAN tagging: enabled
+Administrative private-vlan trunk encapsulation: dot1q
+Administrative private-vlan trunk normal VLANs: none
+Administrative private-vlan trunk associations: none
+Administrative private-vlan trunk mappings: none
+Operational private-vlan: none
+Trunking VLANs Enabled: ALL
+Pruning VLANs Enabled: 2-1001
+Capture Mode Disabled
+Capture VLANs Allowed: ALL
+
+Protected: true
+Appliance trust: none
+
 c. Деактивируйте защищенный порт на интерфейсах F0/6 и F0/7, используя следующие команды:  
-S1(config)# interface range f0/6 - 7  
+S1(config)# interface range e0/2-3  
 S1(config-if-range)# no switchport protected  
 
 
