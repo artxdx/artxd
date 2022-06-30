@@ -438,130 +438,75 @@ Total Addresses in System (excluding one mac per port)     : 0
 Max Addresses limit in System (excluding one mac per port) : 4096
 S1#
 MAC адрес данного интерфейса  5000.0004.0000  
-На данный момент зарегистрирован один MAC адрес.Так как по умолчанию security-port устанавливает один адрес,то при смене данного адреса порт Et0/2 должен выключиться.  
+На данный момент зарегистрирован один MAC адрес.Так как по умолчанию security-port устанавливает один адрес,то при смене данного адреса порт Et0/2 должен выключиться. 
+Для того чтобы произвести имитацию нарушения правил безопасности поменяем mac адрес в нстройках сетевого адаптера PC-A.
+![](portsec.jpg)
 
+После смены адреса выводим информацию как отреагировал комутатор S1
+*Jun 30 08:37:12.843: %PM-4-ERR_DISABLE: psecure-violation error detected on Et0/2, putting Et0/2 in err-disable state
+S1#
+*Jun 30 08:37:12.843: %PORT_SECURITY-2-PSECURE_VIOLATION: Security violation occurred, caused by MAC address aaaa.bbbb.cccc on port Ethernet0/2.
+*Jun 30 08:37:13.848: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet0/2, changed state to down
+S1#
+*Jun 30 08:37:14.848: %LINK-3-UPDOWN: Interface Ethernet0/2, changed state to down  
 
-
-### Шаг 2: Настройте базовую безопасность портов.
-Эта процедура должна выполняться на всех используемых портах доступа. Порт S1 e0/0 показан здесь в качестве примера.  
-a. Из командной строки S1 войдите в режим настройки интерфейса для порта, который подключается к маршрутизатору (FastEthernet0/5).  
-S1(config)# interface e0/0  
-b. Выключите порт коммутатора.  
-S1(config)#interface Ethernet0/0
-S1(config-if)#shutdown
-S1(config-if)#
-*Jun 29 14:18:53.210: %LINK-5-CHANGED: Interface Ethernet0/0, changed state to administratively down
-*Jun 29 14:18:54.214: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet0/0, changed state to down
-c. Включите режим защитного порта.  
-S1(config-if)# switchport port-security  
-Примечание: Порт коммутатора должен быть настроен как порт доступа, чтобы включить защиту порта.  
-Примечание: Ввод только команды switchport port-security устанавливает максимальные MAC-адреса равными 1, а действие нарушения - завершению работы. Команды switchport port-security maximum и switchport port-security violation можно использовать для изменения поведения по умолчанию.   
-d. Настройте статическую запись для MAC-адреса интерфейса R1 G0/0/1, записанного на шаге 1.  
-S1(config-if)# switchport port-security mac-address xxxx.xxxx.xxxx   
-Примечание: xxxx.xxxx.xxxx - это фактический MAC-адрес интерфейса маршрутизатора G0/0/1.  
-Примечание: Вы также можете использовать команду switchport port-security mac-address sticky для добавления всех защищенных MAC-адресов, которые динамически запоминаются на порту (до максимального значения), в конфигурацию коммутатора. 
-S1(config-if)#switchport port-security mac-address 5000.0006.0001  
-
-e. Включите порт коммутатора.  
-S1(config-if)# no shutdown  
-### Шаг 3: Проверьте безопасность порта на S1 e0/0.  
-a. На S1 выполните команду show port-security, чтобы убедиться, что безопасность порта настроена на S1 e0/0.  
-
-S1#show port-security
+Выводим информацию по количеству нарушений.
+S1#sh port-security
 Secure Port  MaxSecureAddr  CurrentAddr  SecurityViolation  Security Action
                 (Count)       (Count)          (Count)
 ---------------------------------------------------------------------------
       Et0/0              1            0                  0         Shutdown
+      Et0/2              1            1                  1         Shutdown
 ---------------------------------------------------------------------------
 Total Addresses in System (excluding one mac per port)     : 0
 Max Addresses limit in System (excluding one mac per port) : 4096
-Для того чтобы произвести имитацию нарушения правил безопасности.Изменим mac-адрес в сваойствах сетевого адаптера PC-A
-
-
 ### Каково количество нарушений безопасности?  
 Введите свои ответы здесь.  
-количество нарушений безопасности - SecurityViolation=0
-### Каков статус порта e0/0?  
+количество нарушений безопасности - SecurityViolation=1   по порту Et0/2
+### Каков статус порта et0/2?  
 Введите свои ответы здесь.  
-No shutdown
+
+Ethernet0/2 is down, line protocol is down (err-disabled)
+  Hardware is AmdP2, address is aabb.cc00.5020 (bia aabb.cc00.5020)
+  MTU 1500 bytes, BW 10000 Kbit/sec, DLY 1000 usec,
+     reliability 255/255, txload 1/255, rxload 1/255
+  Encapsulation ARPA, loopback not set
+
 Каков последний адрес источника и VLAN?  
 не указан  
-b. С помощью интерфейса командной строки R1 выполните ping PC-A для проверки подключения. Это также гарантирует, что коммутатор узнает MAC-адрес R1 G0/0/1.  
-R1# ping 192.168.1.10 
-Type escape sequence to abort.
-Sending 5, 100-byte ICMP Echos to 192.168.5.10, timeout is 2 seconds:
-!!!!!
-Success rate is 100 percent (5/5), round-trip min/avg/max = 2/2/3 ms
-R1#
-c. Теперь нарушите безопасность, изменив MAC-адрес в интерфейсе маршрутизатора. Войдите в режим настройки интерфейса для Fast Ethernet 0/1. Настройте MAC-адрес для интерфейса на интерфейсе, используя aaaa.bbbb.cccc в качестве адреса.  
-R1(config)# interface g0/0/1   
-R1(config-if)# mac-address aaaa.bbbb.cccc  -данная операция не поддерживается маршрутизатором
-R1(config-if)# end  
-### Примечание: Вы также можете изменить MAC-адрес ПК, прикрепленный к S1 e0/2, и добиться результатов, аналогичных показанным здесь.  
-Из командной строки R1 выполните поиск PC-A. Был ли пинг успешным? Объяснять.  
-d. На консоли S1 следите за сообщениями, когда порт e0/2 обнаруживает нарушающий MAC-адрес.  
 
-*Jan 14 01:34:39.750: %PM-4-ERR_DISABLE: psecure-violation error detected on Fa0/5, putting Fa0/5 in err-disable state  
-*Jan 14 01:34:39.750: %PORT_SECURITY-2-PSECURE_VIOLATION: Security violation occurred, caused by MAC address aaaa.bbbb.cccc on port FastEthernet0/5.  
-*Jan 14 01:34:40.756: %LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/5, changed state to down  
-*Jan 14 01:34:41.755: %LINK-3-UPDOWN: Interface FastEthernet0/5, changed state to down  
-e. На коммутаторе используйте команды show port-security, чтобы убедиться, что безопасность порта была нарушена.   
-
-S1# show port-security  
-Secure Port MaxSecureAddr CurrentAddr SecurityViolation Security Action  
-               (Count)       (Count)        (Count)  
---------------------------------------------------------------------  
-      Fa0/5            1           1                 1         Shutdown  
-----------------------------------------------------------------------  
-Total Addresses in System (excluding one mac per port)     : 0  
-Max Addresses limit in System (excluding one mac per port) : 8192  
-  
-S1# show port-security interface f0/5  
-Port Security              : Enabled  
-Port Status                : Secure-shutdown  
-Violation Mode             : Shutdown  
-Aging Time                 : 0 mins  
-Aging Type                 : Absolute  
-SecureStatic Address Aging : Disabled  
-Maximum MAC Addresses      : 1  
-Total MAC Addresses        : 1  
-Configured MAC Addresses   : 1  
-Sticky MAC Addresses       : 0  
-Last Source Address:Vlan   : aaaa.bbbb.cccc:1  
-Security Violation Count   : 1  
-
-S1# show port-security address  
-Secure Mac Address Table  
------------------------------------------------------------------------------  
-Vlan    Mac Address       Type                          Ports   Remaining Age  
-                                                                   (mins)  
-----    -----------       ----                          -----   -------------  
-   1    fc99.4775.c3e1    SecureConfigured              Fa0/5        -  
------------------------------------------------------------------------------ 
-Total Addresses in System (excluding one mac per port)     : 0  
-Max Addresses limit in System (excluding one mac per port) : 8192  
-f. Удалите жестко закодированный MAC-адрес с маршрутизатора и повторно включите интерфейс G0/0/1.  
-R1(config)# interface g0/0/1  
-R1(config-if)# no mac-address aaaa.bbbb.cccc  
-Примечание: Это восстановит исходный MAC-адрес интерфейса Gigabit Ethernet.  
-Из R1 попробуйте снова выполнить пинг PC-A по адресу 192.168.1.10. Был ли пинг успешным? Объяснять.  
-### Шаг 4: Снимите статус отключения ошибки S1 F0/5.  
+### Шаг 4: Снимите статус отключения ошибки S1 Et0/2.  
 a. В консоли S1 устраните ошибку и повторно включите порт, используя команды, показанные в примере. Это изменит статус порта с безопасного завершения работы на Безопасное включение.  
-S1(config)# interface f0/5  
+S1(config)# interface e0/2  
 S1(config-if)# shutdown  
 S1(config-if)# no shutdown  
 ### Примечание: При этом предполагается, что устройство/интерфейс с нарушающим MAC-адресом был удален и заменен исходной конфигурацией устройства/интерфейса.  
 b. Из R1 снова выполните поиск PC-A. На этот раз вы должны добиться успеха.  
-R1# ping 192.168.1.10   
-### Шаг 5: Удалите базовую защиту порта на S1 F0/5.  
+
+R1#ping 192.168.5.10
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.5.10, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 2/2/4 ms
+R1#
+
+### Шаг 5: Удалите базовую защиту порта на S1 e0/2.  
 С консоли S1 снимите защиту порта на F0/5. Эта процедура также может быть использована для повторного включения порта, но команды port security  должны быть перенастроены.  
-S1(config)# interface f0/5  
-S1(config-if)# no switchport port-security  
-S1(config-if)# no switchport port-security mac-address fc99.4775.c3e1  
+S1(config)# interface e0/2  
+S1(config-if)# no switchport port-security mac-address sticky
+S1(config-if)# no switchport port-security mac-address sticky 5000.0004.0000  
 Вы также можете использовать следующие команды для возврата интерфейса к настройкам по умолчанию:  
-S1(config)# default interface f0/5  
-S1(config)# interface f0/5  
+S1(config)# default interface e0/2 
+
+Interface Ethernet0/2 set to default configuration
+S1(config)#
+*Jun 30 09:31:42.096: %SPANTREE-2-ROOTGUARD_CONFIG_CHANGE: Root guard disabled on port Ethernet0/2.
 Примечание: Эта команда default interface также требует, чтобы вы перенастроили порт в качестве порта доступа, чтобы повторно включить команды безопасности.    
+Устанавливаем настройки по базовой защите
+S1(config-if)#switchport mode access  
+S1(config-if)#switchport access vlan 5  
+S1(config-if)#spanning-tree bpduguard enable  
+S1(config-if)#spanning-tree portfast edge  
 ### Шаг 6: (Необязательно) Настройте безопасность портов для VoIP.  
  В этом примере показана типичная конфигурация безопасности порта для голосового порта. Разрешены три MAC-адреса, которые должны быть изучены динамически. Один MAC-адрес предназначен для IP-телефона, один - для коммутатора и один - для ПК, подключенного к IP-телефону. Нарушения этой политики приводят к закрытию порта. Время ожидания устаревания для изученных MAC-адресов установлено равным двум часам.    
 В следующем примере отображается порт S2 F0/18:  
