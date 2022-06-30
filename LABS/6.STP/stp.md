@@ -371,8 +371,9 @@ S1#
 
 ### Шаг 3: Включите root guard.  
 Root guard - это еще один вариант предотвращения несанкционированных переключений и подмены. Защита Root может быть включена на всех портах коммутатора, которые не являются корневыми портами. Обычно он включен только на портах, подключаемых к пограничным коммутаторам, где никогда не должен приниматься улучшенный BPDU. Каждый коммутатор должен иметь только один корневой порт, который является наилучшим путем к корневому коммутатору. 
-a. Следующая команда настраивает root guard на интерфейсе S2 e0/1. Обычно это делается, если к этому порту подключен другой коммутатор. Root guard лучше всего развертывать на портах, которые подключаются к коммутаторам, которые не должны быть корневым мостом.  
-S2(config)#interface Ethernet0/3  
+a. Следующая команда настраивает root guard на интерфейсе S2 e0/1. У функции Root guard нет собственного таймера, она полагается только на получаемые BPDU. Когда функция root guard применяется к портам, она не позволяет им становиться корневыми портами. 
+Cisco рекомендует включать функцию root guard на портах, подключенных к сетевым устройствам, управление которыми не осуществляется. Для настройки функции root guard введите следующую команду:
+S2(config)#interface range Ethernet0/1-3 
 S2(config-if-range)#spanning-tree guard root  
 S2# show spanning-tree inconsistentports   
 
@@ -426,9 +427,7 @@ Max Addresses limit in System (excluding one mac per port) : 4096
 S1#sh port-security address 
                Secure Mac Address Table  
 
-Vlan      |      Mac Address    |      Type               |             Ports    |   Remaining Age  
-          |                     |                         |           (mins)     |
-          |                     |                         |                      |
+Vlan      |      Mac Address    |      Type |||||||||||||||Ports    |   Remaining Age  |   (mins)     |                       
    5      |    5000.0004.0000   |     SecureSticky        |            Et0/2     |              -  
 
 Total Addresses in System (excluding one mac per port)     : 0  
