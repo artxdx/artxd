@@ -426,10 +426,10 @@ Max Addresses limit in System (excluding one mac per port) : 4096
 S1#sh port-security address 
                Secure Mac Address Table  
 
-Vlan            Mac Address          Type                            Ports       Remaining Age  
-                                                                   (mins) 
- 
-   5          5000.0004.0000        SecureSticky                    Et0/2                   -  
+Vlan      |      Mac Address    |      Type               |             Ports    |   Remaining Age  
+          |                     |                         |           (mins)     |
+          |                     |                         |                      |
+   5      |    5000.0004.0000   |     SecureSticky        |            Et0/2     |              -  
 
 Total Addresses in System (excluding one mac per port)     : 0  
 Max Addresses limit in System (excluding one mac per port) : 4096  
