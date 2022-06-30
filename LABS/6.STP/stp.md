@@ -412,17 +412,36 @@ VLAN0005                     0         0        0          3          3
 
 ## Часть 4: Настройка безопасности портов и отключение неиспользуемых портов
 Коммутаторы могут быть подвержены переполнению CAM-таблицы, также известной как таблица MAC-адресов, атакам подмены MAC и несанкционированным подключениям к портам коммутатора. В этой задаче вы настроите безопасность порта, чтобы ограничить количество MAC-адресов, которые могут быть изучены на порту коммутатора, и отключить порт, если это число будет превышено.  
-### Шаг 1: Запишите MAC-адрес R1 G0/0/1.  
-Из командной строки R1 используйте команду show interface и запишите MAC-адрес интерфейса.  
-R1# show interface  
-GigabitEthernet0/1.5 is up, line protocol is up
-  Hardware is iGbE, address is 5000.0006.0001 (bia 5000.0006.0001)
-  Internet address is 192.168.5.1/24
-  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec,
-     reliability 255/255, txload 1/255, rxload 1/255
-  Encapsulation 802.1Q Virtual LAN, Vlan ID  5.
-### Каков MAC-адрес интерфейса R1 G0/0/1?   
-5000.0006.0001
+### Шаг 1: Настройте базовую безопасность порта PC-A e0/2 и запишем его Mac-адрес
+S1(config)#interface Ethernet0/2
+S1(config-if)#port-security
+switchport port-security mac-address sticky
+S1(config-if)#end 
+#sh port-security
+Secure Port  MaxSecureAddr  CurrentAddr  SecurityViolation  Security Action
+                (Count)       (Count)          (Count)
+---------------------------------------------------------------------------
+      Et0/0              1            0                  0         Shutdown
+      Et0/2              1            1                  0         Shutdown
+---------------------------------------------------------------------------
+Total Addresses in System (excluding one mac per port)     : 0
+Max Addresses limit in System (excluding one mac per port) : 4096
+S1#sh port-security address
+               Secure Mac Address Table
+-----------------------------------------------------------------------------
+Vlan    Mac Address       Type                          Ports   Remaining Age
+                                                                   (mins)
+----    -----------       ----                          -----   -------------
+   5    5000.0004.0000    SecureSticky                  Et0/2        -
+-----------------------------------------------------------------------------
+Total Addresses in System (excluding one mac per port)     : 0
+Max Addresses limit in System (excluding one mac per port) : 4096
+S1#
+MAC адрес данного интерфейса  5000.0004.0000  
+На данный момент зарегистрирован один MAC адрес.Так как по умолчанию security-port устанавливает один адрес,то при смене данного адреса порт Et0/2 должен выключиться.  
+
+
+
 ### Шаг 2: Настройте базовую безопасность портов.
 Эта процедура должна выполняться на всех используемых портах доступа. Порт S1 e0/0 показан здесь в качестве примера.  
 a. Из командной строки S1 войдите в режим настройки интерфейса для порта, который подключается к маршрутизатору (FastEthernet0/5).  
@@ -456,6 +475,8 @@ Secure Port  MaxSecureAddr  CurrentAddr  SecurityViolation  Security Action
 ---------------------------------------------------------------------------
 Total Addresses in System (excluding one mac per port)     : 0
 Max Addresses limit in System (excluding one mac per port) : 4096
+Для того чтобы произвести имитацию нарушения правил безопасности.Изменим mac-адрес в сваойствах сетевого адаптера PC-A
+
 
 ### Каково количество нарушений безопасности?  
 Введите свои ответы здесь.  
