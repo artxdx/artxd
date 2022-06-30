@@ -400,8 +400,8 @@ BackboneFast                 is disabled
 Configured Pathcost method used is short    
 
 Name                   Blocking Listening Learning Forwarding STP Active   
-  
-VLAN0005                     0         0        0          3          3     
+                                                                         
+VLAN0005                     0     ||||||||||||||    0    ||||||||    0     |||||||||||||     3     ||||||||||||||||     3     
  
 
 ## Часть 4: Настройка безопасности портов и отключение неиспользуемых портов  
