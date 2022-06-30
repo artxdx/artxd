@@ -414,6 +414,7 @@ S1(config-if)#end
 
 sh port-security    
 
+
 Secure Port  MaxSecureAddr  CurrentAddr  SecurityViolation  Security Action  
                 (Count)       (Count)          (Count)  
 ---------------------------------------------------------------------------  
