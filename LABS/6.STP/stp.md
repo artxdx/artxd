@@ -140,7 +140,7 @@ VLAN0005
              Aging Time  300 sec  
 
 Interface           Role Sts Cost      Prio.Nbr Type  
-------------------- ---- --- --------- -------- --------------------------------  
+
 Et0/0               Desg FWD 100       128.1    Shr  
 Et0/1               Desg FWD 100       128.2    Shr  
 Et0/2               Desg FWD 100       128.3    Shr Edge  
@@ -352,7 +352,7 @@ b. Убедитесь, что защита BPDU настроена с помощ
 S1#show spanning-tree interface Ethernet0/2  
 
 Vlan                Role Sts Cost      Prio.Nbr Type  
-------------------- ---- --- --------- -------- --------------------------------  
+ 
 VLAN0005            Desg FWD 100       128.3    Shr Edge  
 S1#show spanning-tree interface Ethernet0/2 detail  
  Port 3 (Ethernet0/2) of VLAN0005 is designated forwarding  
@@ -377,7 +377,7 @@ S2(config-if-range)#spanning-tree guard root
 S2# show spanning-tree inconsistentports   
 
 Name                 Interface              Inconsistency   
--------------------- ---------------------- ------------------  
+
 Number of inconsistent ports (segments) in the system : 0  
 ### Примечание: Root guard позволяет подключенному коммутатору участвовать в STP до тех пор, пока устройство не попытается стать root. Если root guard блокирует порт, последующее восстановление происходит автоматически. Порт возвращается в состояние пересылки, если вышестоящие BPDU останавливаются.   
 Шаг 4: Включите loop guard.  
@@ -399,9 +399,9 @@ BackboneFast                 is disabled
 Configured Pathcost method used is short    
 
 Name                   Blocking Listening Learning Forwarding STP Active   
----------------------- -------- --------- -------- ---------- ----------    
+  
 VLAN0005                     0         0        0          3          3     
----------------------- -------- --------- -------- ---------- ---------    
+ 
 
 ## Часть 4: Настройка безопасности портов и отключение неиспользуемых портов  
 Коммутаторы могут быть подвержены переполнению CAM-таблицы, также известной как таблица MAC-адресов, атакам подмены MAC и несанкционированным подключениям к портам коммутатора. В этой задаче вы настроите безопасность порта, чтобы ограничить количество MAC-адресов, которые могут быть изучены на порту коммутатора, и отключить порт, если это число будет превышено.    
@@ -416,7 +416,7 @@ sh port-security
 
 
 Secure Port  MaxSecureAddr  CurrentAddr  SecurityViolation  Security Action  
-                (Count)       (Count)          (Count)  
+                    Count         Count              Count  
 
       Et0/0              1            0                  0         Shutdown  
       Et0/2              1            1                  0         Shutdown  
@@ -450,7 +450,7 @@ S1#
 Выводим информацию по количеству нарушений.  
 S1#sh port-security  
 Secure Port  MaxSecureAddr  CurrentAddr  SecurityViolation  Security Action  
-                (Count)       (Count)          (Count)  
+                     Count        Count              Count  
   
       Et0/0              1            0                  0         Shutdown  
       Et0/2              1            1                  1         Shutdown  
