@@ -85,27 +85,65 @@ ASA 5506-X поставляется со встроенным восьмипор
 Используйте команду show version, чтобы определить различные аспекты этого устройства.
 ciscoasa# show version
 
-Cisco Adaptive Security Appliance Software Version 9.15(1)1 
-SSP Operating System Version 2.9(1.131)
-Device Manager Version 7.15(1)
+Cisco Adaptive Security Appliance Software Version 9.7(1)
+Firepower Extensible Operating System Version 2.1(1.66)
+Device Manager Version 7.7(1)
 
-Compiled on Fri 20-Nov-20 18:47 GMT by builders
-System image file is "disk0:/asa9-15-1-1-lfbff-k8.SPA"
+Compiled on Mon 16-Jan-17 09:01 PST by builders
+System image file is "boot:/asa971-smp-k8.bin"
 Config file at boot was "startup-config"
 
-ciscoasa up 2 days 23 hours
+ciscoasa up 5 mins 33 secs
 
-Hardware:   ASA5506, 4096 MB RAM, CPU Atom C2000 series 1250 MHz, 1 CPU (4 cores)
-Internal ATA Compact Flash, 8000MB
-BIOS Flash M25P64 @ 0xfed01000, 16384KB
+Hardware:   ASAv, 2048 MB RAM, CPU Clarkdale 2903 MHz,
+Model Id:   ASAv10
+Internal ATA Compact Flash, 129024MB
+Slot 1: ATA Compact Flash, 129024MB
+BIOS Flash Firmware Hub @ 0x0, 0KB
 
-Encryption hardware device : Cisco ASA Crypto on-board accelerator (revision 0x1)
-                             Number of accelerators: 1
 
- 1: Ext: GigabitEthernet1/1  : address is 00a3.8ecd.0ed2, irq 255
- 2: Ext: GigabitEthernet1/2  : address is 00a3.8ecd.0ed3, irq 255
- 3: Ext: GigabitEthernet1/3  : address is 00a3.8ecd.0ed4, irq 255
-<output omitted>
+ 0: Ext: Management0/0       : address is 5000.0010.0000, irq 11
+ 1: Ext: GigabitEthernet0/0  : address is 5000.0010.0001, irq 11
+ 2: Ext: GigabitEthernet0/1  : address is 5000.0010.0002, irq 10
+ 3: Ext: GigabitEthernet0/2  : address is 5000.0010.0003, irq 10
+ 4: Ext: GigabitEthernet0/3  : address is 5000.0010.0004, irq 11
+ 5: Ext: GigabitEthernet0/4  : address is 5000.0010.0005, irq 11
+ 6: Ext: GigabitEthernet0/5  : address is 5000.0010.0006, irq 10
+ 7: Ext: GigabitEthernet0/6  : address is 5000.0010.0007, irq 10
+
+License mode: Smart Licensing
+ASAv Platform License State: Unlicensed
+No active entitlement: no feature tier and no throughput level configured
+*Memory resource allocation is more than the permitted limit.
+
+Licensed features for this platform:
+Maximum Physical Interfaces       : 10
+Maximum VLANs                     : 50
+Inside Hosts                      : Unlimited
+Failover                          : Active/Standby
+Encryption-DES                    : Enabled
+Encryption-3DES-AES               : Enabled
+Security Contexts                 : 0
+Carrier                           : Disabled
+AnyConnect Premium Peers          : 2
+AnyConnect Essentials             : Disabled
+Other VPN Peers                   : 250
+Total VPN Peers                   : 250
+AnyConnect for Mobile             : Disabled
+AnyConnect for Cisco VPN Phone    : Disabled
+Advanced Endpoint Assessment      : Disabled
+Shared License                    : Disabled
+Total TLS Proxy Sessions          : 2
+Botnet Traffic Filter             : Enabled
+Cluster                           : Disabled
+
+Serial Number: 9AFD5VDF2GM
+
+Image type          : Release
+Key version         : A
+
+Configuration has not been modified since last system restart.
+
 ## Вопросы:
 ## Какая версия программного обеспечения является запущенной?    
 ## Как называется файл образа системы и откуда он был загружен?  
@@ -127,8 +165,8 @@ ciscoasa# show file system
 File Systems:
 
      Size(b)     Free(b)      Type      Flags  Prefixes
-* 7365472256    3859148800    disk      rw      disk0: flash:
-             -             -  disk      rw      disk1:
+* 8571076608    8492691456    disk      rw      disk0: flash:
+  534495232     336928768     disk      ro      boot:
              -             -  network   rw      tftp:
              -             -  opaque    rw      system:
              -             -  network   ro      http:
@@ -138,56 +176,49 @@ File Systems:
              -             -  network   wo      cluster:
              -             -  stub      ro      cluster_trace:
              -             -  network   rw      smb:
+
    
 ## Как еще называется flash:?   
 b. Отобразите содержимое флэш-памяти с помощью команд show flash, show disk0, dir flash: или dir disk0:. Эти команды отображают аналогичные выходные данные.  
 ciscoasa# show flash
---#--  --length--  -----date/time------  path  
-   28  38925172    Jan 24 2021 20:50:06  asdm-7151.bin  
-   29  33          Feb 09 2021 11:43:44  .boot_string  
-    4  4096        Jan 24 2021 20:52:44  log  
-   35  31000       Oct 28 2020 13:46:04  log/asa-appagent.log  
-    5  2265        Feb 19 2021 15:25:22  log/asa-cmd-server.log  
-   14  4096        Aug 29 2017 14:26:24  crypto_archive  
-   15  4096        Aug 29 2017 14:26:28  coredumpinfo  
-   16  59          Aug 29 2017 14:26:28  coredumpinfo/coredump.cfg  
-   31  35209829    Oct 04 2017 03:17:02  anyconnect-win-4.5.02033-webdeploy-k9.pkg  
-   32  70744710    Oct 28 2020 22:31:52  anyconnect-win-4.9.03049-webdeploy-k9.pkg  
-   33  137859680   Jan 24 2021 20:47:30  asa9-15-1-1-lfbff-k8.SPA
-    6  39          Feb 19 2021 15:25:23  snortpacketinfo.conf
+--#--  --length--  -----date/time------  path
+   16  4096        Oct 21 2017 20:42:40  smart-log
+   17  5236        Jul 01 2022 08:27:40  smart-log/agentlog
+    8  4096        Oct 21 2017 20:30:24  log
+   10  1819        Jul 01 2022 08:20:01  log/asa-appagent.log
+   11  4096        Oct 21 2017 21:48:22  coredumpinfo
+   12  59          Oct 21 2017 20:43:06  coredumpinfo/coredump.cfg
+    7  59          Oct 21 2017 20:46:34  use_ttyS0
+   21  26709020    Oct 21 2017 21:46:54  asdm-771.bin
+   22  29942546    Dec 08 2017 07:56:38  anyconnect-win-4.4.01054-webdeploy-k9.g
 
-7365472256 bytes total (3859148800 bytes free)
+8571076608 bytes total (8492691456 bytes free)
 
 Как называется файл ASDM во flash:?    
 ### Шаг 4: Определите текущую текущую конфигурацию.  
 ASA 5506-X обычно используется в качестве пограничного устройства безопасности, которое соединяет малый бизнес  с устройством интернет-провайдера, таким как DSL или кабельный модем, для доступа в Интернет.  
 a. Отобразите текущую текущую конфигурацию с помощью команды show running-config.    
-ciscoasa# show running-config   
-: Saved  
+ciscoasa# show running-config
+: Saved
 
-:   
-: Serial Number: JAD21140GC5  
-: Hardware:   ASA5506, 4096 MB RAM, CPU Atom C2000 series 1250 MHz, 1 CPU (4 cores)  
 :
-ASA Version 9.15(1)1    
-!  
-hostname ciscoasa  
-enable password ***** pbkdf2  
-service-module 1 keepalive-timeout 4  
-service-module 1 keepalive-counter 6  
-service-module sfr keepalive-timeout 4  
-service-module sfr keepalive-counter 6  
-names  
-no mac-address auto  
+: Serial Number: 9AFD5VDF2GM
+: Hardware:   ASAv, 2048 MB RAM, CPU Clarkdale 2903 MHz
+:
+ASA Version 9.7(1)
+!
+hostname ciscoasa
+enable password $sha512$5000$uVo7mQJnnj35qWt+LCLb8w==$YdUyvqvvj9wI0qCvrKAqoQ== 2
+names
 
-!  
-interface GigabitEthernet1/1  
- shutdown  
- no nameif  
- no security-level  
- no ip address  
-!  
-interface GigabitEthernet1/2  
+!
+interface GigabitEthernet0/0
+ shutdown
+ no nameif
+ no security-level
+ no ip address
+!
+
 <output omitted>  
 Примечание: Чтобы остановить вывод команды с помощью интерфейса командной строки, нажмите Q.  
 Вы также можете увидеть другие функции безопасности, такие как глобальная политика, которая проверяет трафик выбранных приложений, который ASA вставляет по умолчанию, если исходная конфигурация запуска была удалена. Фактический выходной сигнал варьируется в зависимости от модели, версии и состояния конфигурации ASA.  
@@ -352,84 +383,99 @@ NETSEC-ASA(config)# passwd cisco
 NETSEC-ASA(config)# enable password class   
 ### Шаг 3: Установите дату и время.  
 Дату и время можно установить вручную с помощью команды clock set. Синтаксис команды установки часов таков: установка часов чч:мм:сс {день месяца | день месяца} год. В следующем примере показано, как установить дату и время с помощью 24-часовых часов:        
-NETSEC-ASA(config)# clock set 2:23:00 feb 22 2021  
+NETSEC-ASA(config)# clock set 11:42:00 jul 1 2021  
 Шаг 4: Настройте  INSIDE и OUTSIDE интерфейсы.
 На этом шаге вы настроите внутренний и внешний интерфейсы, назовете их, назначите IP-адреса и установите уровень безопасности интерфейса.  
 В части 2 интерфейс MGMT был настроен с IP-адресом 192.168.100.1. Вы настроите другой интерфейс в качестве  INSIDE интерфейса для этой лаборатории и удалите IP-адресацию для M1/1. На данный момент вы будете настраивать только INSIDE и OUTSIDE интерфейсы. Интерфейс DMZ будет настроен в следующей лаборатории.  
-a. Настройте интерфейс G1/2 для INSIDE сети, 192.168.1.0/24. Назовите интерфейс  INSIDE, установите уровень безопасности на максимальное значение 100 и включите его.   NETSEC-ASA(config)# interface g1/2  
-NETSEC-ASA(config-if)# nameif INSIDE  
-NETSEC-ASA(config-if)# ip address 192.168.1.1 255.255.255.0  
-NETSEC-ASA(config-if)# security-level 100  
-NETSEC-ASA(config-if)# no shutdown  
- b. Настройте интерфейс G1/1 для OUTSIDE сети, 209.165.200.224/29. Назовите OUTSIDE интерфейс, установите уровень безопасности на самое низкое значение 0 и включите его.      
- NETSEC-ASA(config-if)# interface g1/1  
-NETSEC-ASA(config-if)# nameif OUTSIDE  
-NETSEC-ASA(config-if)# ip address 209.165.200.226 255.255.255.248  
-NETSEC-ASA(config-if)# security-level 0  
-NETSEC-ASA(config-if)# no shutdown   
- c. Удалите конфигурацию из интерфейса M1/1 и выключите ее (при необходимости).      
-NETSEC-ASA(config-if)# interface m1/1  
-NETSEC-ASA(config-if)# shutdown  
-NETSEC-ASA(config-if)# no ip address  
+a. Настройте интерфейс G1/2 для INSIDE сети, 192.168.1.0/24. Назовите интерфейс  INSIDE, установите уровень безопасности на максимальное значение 100 и включите его.   NETSEC-ASA(config)# interface g0/2  
+
+NETSEC-ASA(config)# interface g0/2
+NETSEC-ASA(config-if)# nameif INSIDE
+INFO: Security level for "INSIDE" set to 100 by default.
+NETSEC-ASA(config-if)# ip address 192.168.1.1 255.255.255.0
+NETSEC-ASA(config-if)# security-level 100
+NETSEC-ASA(config-if)# no shutdown
+NETSEC-ASA(config-if)# exit
+ 
+ b. Настройте интерфейс G0/1 для OUTSIDE сети, 209.165.200.224/29. Назовите OUTSIDE интерфейс, установите уровень безопасности на самое низкое значение 0 и включите его.      
+
+NETSEC-ASA(config)# interface g0/1
+NETSEC-ASA(config-if)# nameif OUTSIDE
+INFO: Security level for "OUTSIDE" set to 0 by default.
+NETSEC-ASA(config-if)# ip address 209.165.200.226 255.255.255.248
+NETSEC-ASA(config-if)# security-level 0
+NETSEC-ASA(config-if)# no shutdown
+
+ c. Посмотрел конфигурацию  интерфейса M0/0  - интерфейс выключен.      
+
+ interface Management0/0
+ shutdown
+ no nameif
+ no security-level
+ no ip address
+
 Вы можете получить сообщение о том, что уровень безопасности для INSIDE интерфейса был автоматически установлен на 100, а для OUTSIDE интерфейса был установлен на 0. ASA использует уровни безопасности интерфейса от 0 до 100 для обеспечения соблюдения политики безопасности. Уровень безопасности 100 (INSIDE) является наиболее безопасным, а уровень 0 (OUTSIDE) - наименее безопасным.
 По умолчанию ASA применяет политику, согласно которой трафик с интерфейса более высокого уровня безопасности на интерфейс более низкого уровня разрешен, а трафик с интерфейса более низкого уровня безопасности на интерфейс с более высоким уровнем безопасности запрещен. Политика безопасности ASA по умолчанию разрешает исходящий трафик, который по умолчанию проверяется. Обратный трафик разрешен благодаря проверке пакетов с отслеживанием состояния. Это поведение брандмауэра ASA в “маршрутизируемом режиме” по умолчанию позволяет маршрутизировать пакеты из INSIDE сети во OUTSIDE сеть, но не наоборот. В последней части этой лабораторной работы вы настроите NAT для повышения защиты брандмауэра.
 d. Отобразите статус для всех интерфейсов ASA с помощью команды show interface ip brief.
 ### Примечание: Синтаксис команды отличается от команды show ip interface brief IOS. Если какой-либо из ранее настроенных физических или логических интерфейсов не работает, при необходимости устраните неполадки, прежде чем продолжить.
 ### Совет: Большинство команд ASA show, а также ping, copy и другие могут быть выданы из любого приглашения режима конфигурации без команды do, которая требуется в IOS.      
 
-NETSEC-ASA(config-if)# show interface ip brief
-Interface                  IP-Address      OK? Method Status                Protocol
-Virtual0                   127.1.0.1       YES unset  up                    up  
-GigabitEthernet1/1         209.165.200.226 YES manual up                    up  
-GigabitEthernet1/2         192.168.1.1     YES manual up                    up  
-GigabitEthernet1/3         unassigned      YES unset  administratively down down
-GigabitEthernet1/4         unassigned      YES unset  administratively down down
-GigabitEthernet1/5         unassigned      YES unset  administratively down down
-GigabitEthernet1/6         unassigned      YES unset  administratively down down
-GigabitEthernet1/7         unassigned      YES unset  administratively down down
-GigabitEthernet1/8         unassigned      YES unset  administratively down down
-Internal-Control1/1        unassigned      YES unset  down                  down
-Internal-Data1/1           unassigned      YES unset  down                  down
-Internal-Data1/2           unassigned      YES unset  down                  down
-Internal-Data1/3           unassigned      YES unset  up                    up  
-Internal-Data1/4           169.254.1.1     YES unset  up                    up  
-Management1/1              unassigned      YES unset  administratively down down
+NETSEC-ASA# show interface ip brief
+Interface                  IP-Address      OK? Method Status                Prol
+GigabitEthernet0/0         unassigned      YES unset  administratively down up
+GigabitEthernet0/1         209.165.200.226 YES manual up                    up
+GigabitEthernet0/2         192.168.1.1     YES manual up                    up
+GigabitEthernet0/3         unassigned      YES unset  administratively down up
+GigabitEthernet0/4         unassigned      YES unset  administratively down up
+GigabitEthernet0/5         unassigned      YES unset  administratively down up
+GigabitEthernet0/6         unassigned      YES unset  administratively down up
+Management0/0              unassigned      YES unset  administratively down up
+
 
 e. Отобразите информацию об интерфейсе уровня 3 с помощью команды show ip address.  
 
-NETSEC-ASA(config-if)# show ip address
+NETSEC-ASA# show ip address
 System IP Addresses:
 Interface                Name                   IP address      Subnet mask     Method
-GigabitEthernet1/1       OUTSIDE                209.165.200.226 255.255.255.248 manual
-GigabitEthernet1/2       INSIDE                 192.168.1.1     255.255.255.0   manual
+GigabitEthernet0/1       OUTSIDE                209.165.200.226 255.255.255.248 manual
+GigabitEthernet0/2       INSIDE                 192.168.1.1     255.255.255.0   manual
 Current IP Addresses:
 Interface                Name                   IP address      Subnet mask     Method
-GigabitEthernet1/1       OUTSIDE                209.165.200.226 255.255.255.248 manual
-GigabitEthernet1/2       INSIDE                 192.168.1.1     255.255.255.0   manual
+GigabitEthernet0/1       OUTSIDE                209.165.200.226 255.255.255.248 manual
+GigabitEthernet0/2       INSIDE                 192.168.1.1     255.255.255.0   manual
 
 f. Вы также можете использовать команду show running-config interface для отображения конфигурации для конкретного интерфейса из running-config.  
-NETSEC-ASA(config-if)# show run interface g1/1  
-!  
-interface GigabitEthernet1/1  
- nameif OUTSIDE  
- security-level 0  
- ip address 209.165.200.226 255.255.255.248  
+NETSEC-ASA# show run interface g0/1
+!
+interface GigabitEthernet0/1
+ nameif OUTSIDE
+ security-level 0
+ ip address 209.165.200.226 255.255.255.248 
 
  Шаг 5: Проверьте подключение к ASA.
 a. Убедитесь, что PCB имеет статический IP-адрес 192.168.1.3, маску подсети 255.255.255.0 и шлюз по умолчанию 192.168.1.1.
 b. Вы должны иметь возможность отправлять запросы с PCB на адрес INSIDE интерфейса ASA и отправлять запросы с ASA на PC-B. Если пинги завершаются неудачей, при необходимости устраните неполадки в конфигурации.  
 
-      NETSEC-ASA(config-if)# ping 192.168.1.3
+NETSEC-ASA# ping 192.168.1.3
 Type escape sequence to abort.
 Sending 5, 100-byte ICMP Echos to 192.168.1.3, timeout is 2 seconds:
 !!!!!
 Success rate is 100 percent (5/5), round-trip min/avg/max = 1/2/10 ms
 
+
 c. С ПК-C выполните поиск по IP-адресу OUTSIDE интерфейса 209.165.200.226. В качестве альтернативы, вместо настройки PCC только для проверки ping, вы можете отправить ping из интерфейса G0/0/0 на R1. Вы не должны иметь возможности пинговать OUTSIDE интерфейс.  
- R1# ping 209.165.200.226 source 172.16.3.1
+PC-C> ping 209.165.200.226
+
+209.165.200.226 icmp_seq=1 timeout
+209.165.200.226 icmp_seq=2 timeout
+209.165.200.226 icmp_seq=3 timeout
+209.165.200.226 icmp_seq=4 timeout
+209.165.200.226 icmp_seq=5 timeout
+
+R1#ping 209.165.200.226 source 172.16.3.1
 Type escape sequence to abort.
 Sending 5, 100-byte ICMP Echos to 209.165.200.226, timeout is 2 seconds:
-Packet sent with a source address of 172.16.3.1 
+Packet sent with a source address of 172.16.3.1
 .....
 Success rate is 0 percent (0/5)
 R1#
